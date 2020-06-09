@@ -5,6 +5,13 @@ shipinfo::shipinfo(Row* cel) {
     searchtag = MargeaSearch();
 }
 
+shipinfo::~shipinfo() {
+    //freeItem(its);
+    //free(shipday);//元で解放 no malloc
+    free(day);
+    //セル引数　元で解放 cel no malloc
+}
+
 void shipinfo::shipdataRead() {
     Row* r = cells;
     UINT32 shipR = 7;
@@ -43,41 +50,6 @@ void shipinfo::shipdataRead() {
             day[6] = '\0';
             daylen = 6;
         }
-        
-        /*if (shipday[i] == '-') {//SHIP
-            
-
-            if (day) {
-                for (int j = 0; j < 4; j++) {
-                    day[j] = shipday[i - 4 + j];
-                }
-                day[6] = '\n';
-                for (int t = 0; t < 4; t++)
-                    day[7 + t] = shipday[t + i + 1];
-                day[11] = '\0';
-                daylen = 11;
-            }
-        }
-        else {//FEDEX
-            i = 0;
-            while (shipday[i] != ' ' && shipday[i] != '\0') {
-                i++;
-            }
-
-            day = (UINT8*)malloc(13);
-
-            if (day) {
-                day[0] = 'P'; day[1] = 'L';
-
-                for (int j = 0; j < 4; j++) {
-                    day[2 + j] = shipday[i - 4 + j];
-                }
-                day[6] = '\n';
-                day[7] = 'F'; day[8] = 'E'; day[9] = 'D'; day[10] = 'E'; day[11] = 'X';
-                day[12] = '\0';
-                daylen = 12;
-            }
-        }*/
     }
 }
 
@@ -94,7 +66,7 @@ UINT8* shipinfo::outuntil(UINT8 c, UINT8* st)
         }
         j++;
     }
-    const UINT32 msize = (UINT32)i + 1;
+    const UINT32 msize = (UINT32)j + 1;
     p = (UINT8*)malloc(msize);
 
     if (j == 0) {//最初に　(　があったら　)が読み始め
@@ -236,14 +208,14 @@ void shipinfo::GetItems() {
     std::cout << "item cell column : " << ITEMrow << std::endl;
     int j = 0;
     while (sr) {
-
-        while (sr->cells) {
+        /*while (sr->cells) {
+            //std::cout << "item cell Si : " << sr->cells->si << std::endl;
             if (sr->cells->col == ITcells[0] && ITcells[0] != 0) {//numbe
                 j = 0;
-
                 if (sr->cells->si) {
-                    while (sr->cells->si[j] != '\0')
-                        j++;
+                    //std::cout << "item cell Si : " << sr->cells->si << std::endl;
+                    //while (sr->cells->si[j] != '\0')
+                    //    j++;
 
                     //IN = (UINT8*)malloc(j);
                     IN = outuntil('(', sr->cells->si);
@@ -253,8 +225,8 @@ void shipinfo::GetItems() {
             if (sr->cells->col == ITcells[1] && itemnumFlag && ITcells[1] != 0) {//color
                 j = 0;
                 if (sr->cells->si) {
-                    while (sr->cells->si[j] != '\0')
-                        j++;
+                   // while (sr->cells->si[j] != '\0')
+                    //    j++;
                     //Colo = (UINT8*)malloc(j);
                     Colo = outuntil('(', sr->cells->si);
                 }
@@ -352,7 +324,16 @@ void shipinfo::GetItems() {
                 twe = nullptr; thr = nullptr; four = nullptr; fif = nullptr; six = nullptr; f = nullptr;
             }
             sr->cells = sr->cells->next;
-        }
+        }*/
         sr = sr->next;
+    }
+}
+
+void shipinfo::freeItem(Items* t) {
+    struct Items* q;
+    while (t != NULL) {
+        q = t->next;  /* 次へのポインタを保存 */
+        free(t);
+        t = q;
     }
 }

@@ -50,7 +50,8 @@ void Ctags::addcelldata(UINT8* row, UINT8* col, UINT8* t, UINT8* s, UINT8* v, F*
 }
 
 void Ctags::writesheetdata() {
-    UINT64 msize= dlen + 2000;
+    size_t msize= size_t(dlen) + 2000;
+
     wd = (UINT8*)malloc(msize);//メモリサイズ変更　書き込み用
     //std::cout << "データ更新" << p << std::endl;
     p = 0;

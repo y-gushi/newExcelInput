@@ -26,29 +26,32 @@ C* Ctags::addCtable(C* c, UINT8* tv, UINT8* sv, UINT8* si, UINT32 col, UINT8* v,
         c->val = v;
         c->t = tv;
         c->s = sv;
+        c->si = si;
         c->col = col;
         c->f = fv;
-    }else if(col < c->col){
-        C* p=(C*)malloc(sizeof(C));
+    }
+    else if (col < c->col) {
+        C* p = (C*)malloc(sizeof(C));
         if (p && c) {
             p->val = c->val;
             p->t = c->t;
             p->s = c->s;
+            p->si = c->si;
             p->col = c->col;
             p->f = c->f;
             p->next = c->next;
         }
-        
+
         c = (C*)malloc(sizeof(C));
         if (c) {
             c->val = v;
             c->t = tv;
             c->s = sv;
+            c->si = si;
             c->col = col;
             c->f = fv;
             c->next = p;
         }
-        
     }
     else {
         c->next = addCtable(c->next, tv, sv, si, col, v, fv);
@@ -75,11 +78,11 @@ Ctags::~Ctags()
     free(headXML);
     free(dimtopane);
     free(sFPr);
-    free(sct);
+    //free(sct);
     free(dm);
-    free(cls);
-    free(Panes);
-    free(MC);
+    //free(cls);
+    //free(Panes);
+    //free(MC);
 
     free(wd);
 }
@@ -258,7 +261,7 @@ void Ctags::GetCtagValue() {
 
                             if (sistrlen > 0) {
                                 sistrlen = sistrlen+1;
-                                free(Vsi);
+                                //free(Vsi);
                                 Vsi = (UINT8*)malloc(sistrlen);//ƒƒ‚ƒŠŠm•Û
 
                                 sistrlen = 0;
@@ -277,7 +280,8 @@ void Ctags::GetCtagValue() {
                             Srow = searchRow(rows, rownum);
                             if (Srow) {
                                 Srow->cells = addCtable(Srow->cells, Tv, Sv, Vsi, colnum, Vv, fvs);
-                                Vsi = (UINT8*)malloc(1); Vsi = nullptr;
+                               // Vsi = (UINT8*)malloc(1);
+                                Vsi = nullptr;
                                 RootSi = nullptr;
                             }
                             else {

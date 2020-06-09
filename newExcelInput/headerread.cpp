@@ -20,10 +20,13 @@ HeaderRead::HeaderRead(char* name) {
 }
 
 HeaderRead::~HeaderRead() {
-    /*free(root);
+    //free(root);
     free(r);
     free(ER);
-    free(LH);*/
+    free(LH);
+    free(CD);
+    free(cdfn);
+    free(scd);
 }
 
 //ファイル名でセントラルディレクトリ　データ検索
@@ -83,10 +86,12 @@ bool HeaderRead::searchChara(char fn[], char* cdfn, UINT16 cdfnlen)
                 if (strcmp(searchfilename, fn) == 0)
                 {
                     //std::cout << "local filename match" << std::endl;
+                    free(searchfilename);
                     return true;
                 }
             }
         }
+        free(searchfilename);
     }
 
     return false;

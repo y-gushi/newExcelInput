@@ -7,7 +7,7 @@ shareRandD::shareRandD(UINT8* d, UINT64 l) {
 }
 
 shareRandD::~shareRandD() {
-    for (int i = 0; i < siunique; i++)//シェアー文字列　メモリ解放
+    for (int i = 0; i < mycount; i++)//シェアー文字列　メモリ解放
         Sitablefree(sis[i]);
 }
 
@@ -275,10 +275,9 @@ void shareRandD::ReadShare() {
                                 dp++;
                             }
                             sistr[i] = '\0';
-                            //char* ch = change.CharChenge(sistr);
-                            //std::cout<<"get si str : "<<ch<<"    si count : "<<mycount<<std::endl;
+
                             sis[mycount] = addSitable(sis[mycount], sistr);
-                            //sis[mycount] = Sts;//sharestring番号配列に参照
+
                             Tcount++;//t配列数
                         }
                         else {
@@ -290,7 +289,7 @@ void shareRandD::ReadShare() {
                 mycount++;//si配列数
             }
         }
-        //free(sip); free(Esip);
+        free(sip); free(Esip);
     }
     else {
         std::cout << "malloc si get null" << std::endl;
