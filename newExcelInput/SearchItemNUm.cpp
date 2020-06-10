@@ -5,9 +5,44 @@ searchItemNum::searchItemNum(Items* itemstruct, Ctags* cs) {
     Cels = cs;
     Mstr = MargeaSearch();
     rootMat = nullptr;
+    intxtCount = 0;
 }
 
-bool searchItemNum::searchitemNumber(UINT8* uniq) {
+char** searchItemNum::slipInputText(char* ins) {
+    int i = 0;
+    
+    while (ins[i] != '\0') {
+        if (ins[i] == '\n')//改行数 コメント数　改行で行分ける
+            intxtCount++;
+        i++;
+    }
+    intxtCount++;//最終行プラス
+
+    char** instrs = (char**)malloc(intxtCount);
+
+    int j = 0;
+    i = 0;
+    int stockpos = 0;
+    while (j < intxtCount) {
+        while (ins[i] != '\n' && ins[i] != '\0') {
+            i++;
+        }
+        int strleng = i-stockpos;
+        instrs[j] = (char*)malloc(strleng + 1);
+        for (int t = 0; t < strleng; t++)
+            instrs[j][t] = ins[stockpos+t];
+        instrs[j][strleng] = '\0';
+        std::cout << "入力テキスト：" << instrs[j] << std::endl;
+        i++;//改行　スキップ
+        stockpos = i;//スタート位置更新
+
+        j++;
+    }
+
+    return instrs;
+}
+
+bool searchItemNum::searchitemNumber(UINT8* uniq,UINT8** siNumbers,int sicounts) {
     Row* sr = nullptr;
     sr = Cels->rows;
     Items* Item = nullptr;
@@ -36,7 +71,7 @@ bool searchItemNum::searchitemNumber(UINT8* uniq) {
                         changenum.ColumnIncliment(&inputColum);//最終列　+1
                         nr = changenum.InttoChar(sr->next->r, &result);//入力行
                         incolumn = changenum.ColumnNumtoArray(inputColum, &result);//最終列　配列変換
-                        startR = sr->next->r;//品番の行
+                        startR = sr->next->r;//品番次の行
                         incellflag = true;
                         break;
                     }
@@ -51,8 +86,16 @@ bool searchItemNum::searchitemNumber(UINT8* uniq) {
 
     if (!incellflag)
         return false;//品番一致なし
-    else
-        Cels->addcelldata(nr, incolumn, (UINT8*)SaT[0], (UINT8*)SaT[1], uniq, nullptr, nullptr);//最初の一回に変更
+    else {
+        int rowslide = startR;
+        Cels->addcelldata(nr, incolumn, (UINT8*)SaT[0], (UINT8*)SaT[1], uniq, nullptr, nullptr);//最初の一回に変更 メインの日付追加
+        //サブ文字列追加
+        for (int i = (sicounts - 1); i >= 0; i--) {
+            rowslide--;
+            UINT8* srow= changenum.InttoChar(rowslide, &result);
+            Cels->addcelldata(srow, incolumn, (UINT8*)SaT[0], (UINT8*)SaT[1], siNumbers[i], nullptr, nullptr);
+        }
+    }
 
     Item = its;
 

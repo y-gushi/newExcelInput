@@ -98,8 +98,8 @@ void shareRandD::getSicount() {
         free(getunique);
     }
 }
-
-UINT8* shareRandD::writeshare(UINT8* instr, int instrlen) {
+/*<si><t>5/21着</t><rPh sb="4" eb="5"><t>チャク</t></rPh><phoneticPr fontId="1"/></si>*/
+UINT8* shareRandD::writeshare(UINT8* instr, int instrlen,char **substr,UINT8 **submath,int INstrCount) {
     UINT8 sitag[] = "<si>";
     UINT8 searchsi[5] = { 0 };
     UINT8 siend[] = "</si>";
@@ -118,8 +118,14 @@ UINT8* shareRandD::writeshare(UINT8* instr, int instrlen) {
     int sislide = 0;
     int datapos = 0;
 
-    sicount++;
-    siunique++;
+    int stocksic = sicount;
+
+    for (int i = 0; i < INstrCount; i++) {
+        if (!submath) {
+            sicount++;//1タグ分増やす
+            siunique++;
+        }
+    }
 
     countstr = st.InttoChar(sicount, &sicount_place);
     uniqstr = st.InttoChar(siunique, &siunique_place);
@@ -194,6 +200,12 @@ UINT8* shareRandD::writeshare(UINT8* instr, int instrlen) {
     //in string data write
     const char si[] = "<si><t>";
     const char esi[] = "</t><phoneticPr fontId=\"366\"/></si>";
+    const char ssi[] = "</t></si>";
+    int nmc = 0;
+
+    sicount = stocksic;//sicount書き込み前の数に
+
+    //メイン日付文字列追加
     for (int i = 0; i < strlen(si); i++) {
         writedata[writeleng] = si[i];
         writeleng++;
@@ -202,10 +214,34 @@ UINT8* shareRandD::writeshare(UINT8* instr, int instrlen) {
         writedata[writeleng] = instr[i];
         writeleng++;
     }
+    sicount++;
     for (int i = 0; i < strlen(esi); i++) {
         writedata[writeleng] = esi[i];
         writeleng++;
     }
+
+    //サブ文字列追加
+    for (int j = 0; j < INstrCount; j++) {
+        if (!submath) {//siになければ書き込み
+            for (int i = 0; i < strlen(si); i++) {
+                writedata[writeleng] = si[i];
+                writeleng++;
+            }
+            nmc = 0;
+            while (substr[j][nmc] != '\0') {
+                writedata[writeleng] = substr[j][nmc];
+                nmc++; writeleng++;
+                submath[j] = st.InttoChar(sicount, &sicount_place);//si番号入れる
+                sicount++;
+            }
+            for (int i = 0; i < strlen(ssi); i++) {
+                writedata[writeleng] = ssi[i];
+                writeleng++;
+            }
+        }
+        std::cout << "si number : " << submath << std::endl;
+    }
+    
 
     //write to end
     while (datapos < sdlen) {
@@ -220,6 +256,23 @@ UINT8* shareRandD::writeshare(UINT8* instr, int instrlen) {
 
     return writedata;//元データ更新
 }
+//Si 文字列検索
+UINT8* shareRandD::searchSi(char* s) {
+    int result = 0;
+    int place = 0;
+    UINT8* num = nullptr;
+    for (int i = 0; i < mycount; i++) {
+        result = strcmp((const char*)sis[i]->Ts, s);
+        if (result == 0) {//文字列一致
+            num=st.InttoChar(i,&place);//intをcharへ
+
+            return num;
+        }
+    }
+
+    return nullptr;
+}
+
 //share を配列へ入れる
 void shareRandD::ReadShare() {
     /*そのセルの書式設定は、RichTextRun (<r>) 要素と RunProperties (<rPr>) 要素を使用して、テキストと一緒に共有文字列項目内に保存されます。 異なる方法で書式設定されているテキスト間の空白文字を保持するために、text (<t>) 要素の space 属性は preserve に設定されています。 */

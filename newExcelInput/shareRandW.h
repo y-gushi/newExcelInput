@@ -36,7 +36,9 @@ public:
     shareRandD(UINT8* d, UINT64 l);
     ~shareRandD();
     void getSicount();//unique and count get
-    UINT8* writeshare(UINT8* instr, int instrlen);//share str plus
+    UINT8* writeshare(UINT8* instr, int instrlen, char** substr, UINT8** submath, int INstrCount);
+    UINT8* searchSi(char* s);
+    //share str plus
     Si* addSitable(Si* s, UINT8* str);
     void Sitablefree(Si* s);
     void ReadShare();//si<t>•¶Žš—ñ”z—ñ‚Ö•Û‘¶

@@ -11,23 +11,24 @@
 #include "ZipFilewrite.h"
 #include "shareRandW.h"
 #include "RowColumn.h"
-#include <crtdbg.h>//メモリリーク用
+//#include <crtdbg.h>//メモリリーク用
 
 int main(char* fname[], int i) {
 
     // メモリリーク検出
-    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+    //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
     char PLfn[] = "C:/Users/Bee/Desktop/LY200605-A BEEだけ.xlsx"; //読み込むファイルの指定 /LY20191127-SHIP BEE だけ.xlsx
     char Zfn[] = "C:/Users/Bee/Desktop/【1 縦売り 夏】在庫状況.xlsx";
     char mfile[] = "C:/Users/Bee/Desktop/test[システム].xlsx"; //テスト書き出し
     char recd[] = "C:/Users/Bee/Desktop/Centraldata"; //テスト書き出し
 
+    char inputStr[] = "2020\nship\n5/19着\nPL0513\nBee";
+
     /*-----------------------
      シェアー文字列読み込み
      -----------------------*/
-
-    
+        
     char shares[] = "sharedStrings.xml";//ファイル位置　ファイル名部分一致検索　sharedStrings.xml
 
     std::ifstream PLR(PLfn, std::ios::in | std::ios::binary);
@@ -113,13 +114,31 @@ int main(char* fname[], int i) {
         decShare->dataread(hr2->LH->pos, cddata->nonsize);
     }
 
+    //入力テキスト文字分ける
+    searchItemNum* spltxt=new searchItemNum(nullptr,nullptr);
+    char **splstr=spltxt->slipInputText(inputStr);//分割テキスト
+    int txtnum = spltxt->intxtCount;//テキスト数
+
+    delete spltxt;//文字分け終了　解放
+
     sharray = new shareRandD(decShare->ReadV, decShare->readlen);//share 再初期化
 
     sharray->getSicount();//get si count
 
-    decShare->ReadV = sharray->writeshare(sg->day, sg->daylen);//share文字列書き込み share data更新
-
     sharray->ReadShare();//文字列読み込み
+
+    //share 検索　あったら番号取得
+    int ma = 0;
+    UINT8** instrFlag = (UINT8**)malloc(txtnum);
+    for(int o=0;o<txtnum;o++)
+        instrFlag[o]=sharray->searchSi(splstr[o]);//マッチした文字列のSi番号取得　なければnullptr
+
+    //シェアー書き込み
+    decShare->ReadV = sharray->writeshare(sg->day, sg->daylen,splstr,instrFlag,txtnum);//share文字列書き込み share data更新
+
+    for (int t = 0; t < txtnum; t++) {//文字列解放
+        free(splstr[t]);
+    }
 
     /*--------------------------
     share data書き込み　圧縮
@@ -205,7 +224,7 @@ int main(char* fname[], int i) {
             sI = new searchItemNum(sg->its, mh);
 
             //std::cout << "sharray.uniqstr : " << sharray.uniqstr << std::endl;
-            t = sI->searchitemNumber(sharray->uniqstr);//品番検索　＆　セルデータ追加　シェアー消去（入れる場合は引数に）
+            t = sI->searchitemNumber(sharray->uniqstr, instrFlag,txtnum);//品番検索　＆　セルデータ追加　シェアー消去（入れる場合は引数に）
 
             if (t)
             {//一致品番あった場合
@@ -269,6 +288,7 @@ int main(char* fname[], int i) {
         }
     }
     free(cddata);
+    free(instrFlag);
 
     Items* errorItem = (Items*)malloc(sizeof(Items));
     errorItem = nullptr;
