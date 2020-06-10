@@ -83,7 +83,7 @@ Ctags::~Ctags()
     //free(cls);
     //free(Panes);
     //free(MC);
-
+    free(fstr);
     free(wd);
 }
 
@@ -199,22 +199,24 @@ void Ctags::GetCtagValue() {
             if (data[p - 1] == '/') {//no v data
                 Srow = searchRow(rows, rownum);
                 if (Srow) {
-                    Srow->cells = addCtable(Srow->cells, Tv, Sv, nullptr, colnum, Vv, fvs);
+                    UINT8* sinull = StrInit();
+                    Srow->cells = addCtable(Srow->cells, Tv, Sv, sinull, colnum, Vv, fvs);
                 }
                 else {
                     //need make new row
                 }
                 free(col); free(row);
                 col = nullptr; row = nullptr;
-
-                Tv = (UINT8*)malloc(1); Tv = nullptr;
-                Sv = (UINT8*)malloc(1); Sv = nullptr;
-                ft = (UINT8*)malloc(1); ft = nullptr;
-                fre = (UINT8*)malloc(1); fre = nullptr;
-                fsi = (UINT8*)malloc(1); fsi = nullptr;
-                fv = (UINT8*)malloc(1); fv = nullptr;
-                Vv = (UINT8*)malloc(1); Vv = nullptr;
-                fvs = (F*)malloc(sizeof(F)); fvs = nullptr;
+                if (Tv)Tv = StrInit();
+                if (Sv)Sv = StrInit();
+                if (ft)ft = StrInit();
+                if (fre)fre = StrInit();
+                if (fsi)fsi = StrInit();
+                if (fv)fv = StrInit();
+                if (Vv)Vv = StrInit();
+                if (fvs) {
+                    fvs = (F*)malloc(sizeof(F)); fvs = nullptr;
+                }
                 ft = 0;
             }
             else {//get v tag
@@ -280,7 +282,6 @@ void Ctags::GetCtagValue() {
                             Srow = searchRow(rows, rownum);
                             if (Srow) {
                                 Srow->cells = addCtable(Srow->cells, Tv, Sv, Vsi, colnum, Vv, fvs);
-                               // Vsi = (UINT8*)malloc(1);
                                 Vsi = nullptr;
                                 RootSi = nullptr;
                             }
@@ -300,14 +301,16 @@ void Ctags::GetCtagValue() {
                         }
                         free(col); free(row);
                         col = nullptr; row = nullptr;
-                        Vv = (UINT8*)malloc(1); Vv = nullptr;
-                        Tv = (UINT8*)malloc(1); Tv = nullptr;
-                        Sv = (UINT8*)malloc(1); Sv = nullptr;
-                        ft = (UINT8*)malloc(1); ft = nullptr;
-                        fre = (UINT8*)malloc(1); fre = nullptr;
-                        fsi = (UINT8*)malloc(1); fsi = nullptr;
-                        fv = (UINT8*)malloc(1); fv = nullptr;
-                        fvs = (F*)malloc(sizeof(F)); fvs = nullptr;
+                        if (Tv)Tv = StrInit();
+                        if (Sv)Sv = StrInit();
+                        if (ft)ft = StrInit();
+                        if (fre)fre = StrInit();
+                        if (fsi)fsi = StrInit();
+                        if (fv)fv = StrInit();
+                        if (Vv)Vv = StrInit();
+                        if (fvs) {
+                            fvs = (F*)malloc(sizeof(F)); fvs = nullptr;
+                        }
                         ft = 0;
                     }
 
@@ -386,13 +389,13 @@ void Ctags::GetCtagValue() {
                             fvs->val = fv;
                         }
                         if (!fre)
-                            fvs->ref = nullptr;
+                            fvs->ref = StrInit();
                         if (!fsi)
-                            fvs->si = nullptr;
+                            fvs->si = StrInit();
                         if (!ft)
-                            fvs->t = nullptr;
+                            fvs->t = StrInit();
                         if (!fv)
-                            fvs->val = nullptr;
+                            fvs->val = StrInit();
                     }
                 }
             }
@@ -711,6 +714,7 @@ void Ctags::GetSelectionPane() {
     UINT8* sq = (UINT8*)malloc(1);
     UINT8* PT = (UINT8*)malloc(5);
 
+    pa = nullptr; ac = nullptr; sq = nullptr;
     int res = 1;
     int panetagres = 0;
 
@@ -771,7 +775,7 @@ void Ctags::GetSelectionPane() {
             GetPane();
         }
         if (seleresult == 0) {
-            pa = nullptr; ac = nullptr; sq = nullptr;
+            
             if (data[p] == '/') {//tag終了
                 sct = SLTaddtable(sct, nullptr, nullptr, nullptr);//すべてnullptrわたす
             }
@@ -831,10 +835,9 @@ void Ctags::GetSelectionPane() {
                 }
                 if (pa || ac || sq) {
                     sct = SLTaddtable(sct, pa, ac, sq);//構造体へコピー
-                    sq = (UINT8*)malloc(1);
-                    pa = (UINT8*)malloc(1);
-                    ac = (UINT8*)malloc(1);
-                    sq = nullptr; pa = nullptr; ac = nullptr;
+                    if (sq)sq = StrInit();
+                    if (pa)pa = StrInit();
+                    if (ac)ac = StrInit();
                 }
             }
         }
@@ -974,13 +977,13 @@ void Ctags::Getcols() {
     UINT8* Scoltag = (UINT8*)malloc(5);
     int result = 0;
     int coltaglen = 7;
-    unsigned char* min = nullptr;
-    unsigned char* max = nullptr;
-    unsigned char* style = nullptr;
-    unsigned char* bestf = nullptr;
-    unsigned char* hidd = nullptr;
-    unsigned char* colw = nullptr;
-    unsigned char* cuw = nullptr;
+    unsigned char* min = StrInit();
+    unsigned char* max = StrInit();
+    unsigned char* style = StrInit();
+    unsigned char* bestf = StrInit();
+    unsigned char* hidd = StrInit();
+    unsigned char* colw = StrInit();
+    unsigned char* cuw = StrInit();
     int endresult = 1;
 
     int sfplen = 0;
@@ -1016,13 +1019,6 @@ void Ctags::Getcols() {
             UINT8* cbf = (UINT8*)malloc(9);
             UINT8* chid = (UINT8*)malloc(8);
 
-            min = nullptr;
-            max = nullptr;
-            style = nullptr;
-            bestf = nullptr;
-            hidd = nullptr;
-            colw = nullptr;
-            cuw = nullptr;
             int StrLen = 0;
             while (data[p] != '>') {
                 for (int j = 0; j < 13 - 1; j++) {
@@ -1131,20 +1127,14 @@ void Ctags::Getcols() {
                 }
             }
             cls = addcolatyle(cls, min, max, colw, style, hidd, bestf, cuw);
-            min = (UINT8*)malloc(1);
-            min = nullptr;
-            max = (UINT8*)malloc(1);
-            max = nullptr;
-            style = (UINT8*)malloc(1);
-            style = nullptr;
-            bestf = (UINT8*)malloc(1);
-            bestf = nullptr;
-            hidd = (UINT8*)malloc(1);
-            hidd = nullptr;
-            colw = (UINT8*)malloc(1);
-            colw = nullptr;
-            cuw = (UINT8*)malloc(1);
-            cuw = nullptr;
+            if (min)min = StrInit();
+            if(max)max = StrInit();
+            if(style)style = StrInit();
+            if(bestf)bestf = StrInit();
+            if(hidd) hidd = StrInit();
+            if(colw) colw = StrInit();
+            if(cuw)cuw = StrInit();
+
             free(ccw); free(cbf); free(chid); free(wist); free(mimax);
         }
     }

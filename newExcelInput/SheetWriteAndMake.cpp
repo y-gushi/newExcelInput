@@ -2,7 +2,7 @@
 
 //セルデータの追加　row span更新
 void Ctags::addcelldata(UINT8* row, UINT8* col, UINT8* t, UINT8* s, UINT8* v, F* f, UINT8* si) {
-    Row* ro = (Row*)malloc(sizeof(Row));
+    Row* ro = nullptr;
     bool replace = false;
     int rp = 0;//桁数
     while (row[rp] != '\0')
@@ -50,15 +50,15 @@ void Ctags::addcelldata(UINT8* row, UINT8* col, UINT8* t, UINT8* s, UINT8* v, F*
 }
 
 void Ctags::writesheetdata() {
-    size_t msize= size_t(dlen) + 2000;
+    size_t msize= size_t(dlen) + 6000;
 
     wd = (UINT8*)malloc(msize);//メモリサイズ変更　書き込み用
     //std::cout << "データ更新" << p << std::endl;
     p = 0;
 
-    if (data) {
+    if (wd) {
         while (headXML[p] != '\0') {
-            data[p] = headXML[p];
+            wd[p] = headXML[p];
             p++;
         }
     }
@@ -510,4 +510,11 @@ void Ctags::writefinal() {
     while (fstr[writep] != '\0') {// /v
         wd[p] = fstr[writep]; p++; writep++;
     }writep = 0;
+}
+
+UINT8* Ctags::StrInit()
+{
+    UINT8* p = (UINT8*)malloc(1);
+    p = nullptr;
+    return p;
 }

@@ -137,10 +137,10 @@ public:
 
     HeaderRead(char* name);
     ~HeaderRead();
-    void endread();//エンドヘッダー情報読み取り
-    void localread(UINT64 pos);
-    void centerread(UINT64 pos, UINT32 size, UINT16 n);
-    CenterDerect* centeroneread(UINT64 pos, UINT32 size, UINT16 n,char* fn);
+    void endread(std::ifstream* fin);//エンドヘッダー情報読み取り
+    void localread(UINT64 pos, std::ifstream* fin);
+    void centerread(UINT64 pos, UINT32 size, UINT16 n, std::ifstream* fin);
+    CenterDerect* centeroneread(UINT64 pos, UINT32 size, UINT16 n, char* fn, std::ifstream* fin);
 
     CenterDerect* searchCENTRAL(char* s);//ファイル名でセントラルディレクトリの検索
 

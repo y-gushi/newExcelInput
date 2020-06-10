@@ -208,7 +208,7 @@ void shipinfo::GetItems() {
     std::cout << "item cell column : " << ITEMrow << std::endl;
     int j = 0;
     while (sr) {
-        /*while (sr->cells) {
+        while (sr->cells) {
             //std::cout << "item cell Si : " << sr->cells->si << std::endl;
             if (sr->cells->col == ITcells[0] && ITcells[0] != 0) {//numbe
                 j = 0;
@@ -324,7 +324,7 @@ void shipinfo::GetItems() {
                 twe = nullptr; thr = nullptr; four = nullptr; fif = nullptr; six = nullptr; f = nullptr;
             }
             sr->cells = sr->cells->next;
-        }*/
+        }
         sr = sr->next;
     }
 }

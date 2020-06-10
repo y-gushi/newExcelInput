@@ -164,25 +164,25 @@ filelist* HeaderRead::addfn(filelist* f, char* fn, int h)
 }
 
 
-void HeaderRead::endread() {
-    std::ifstream fin(readfile, std::ios::in | std::ios::binary);
+void HeaderRead::endread(std::ifstream* fin) {
+    //std::ifstream fin(readfile, std::ios::in | std::ios::binary);
     if (!fin) {
         std::cout << "ファイル ID.txt が開けません";
     }
 
-    fin.seekg(0, std::ios_base::end);//ファイル終端位置取得
+    fin->seekg(0, std::ios_base::end);//ファイル終端位置取得
     UINT64 endpos = 0;
-    endpos = fin.tellg();
+    endpos = fin->tellg();
 
     curpos = endpos;
     curpos -= 1;
-    fin.seekg(curpos, std::ios_base::beg);
+    fin->seekg(curpos, std::ios_base::beg);
     //std::cout << "posishion" << curpos << std::endl;
 
     /*終端コード検索　ファイル終わりから*/
     while (curpos > 0) {
 
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         sig = sig << 8;
         sig += readdata;
         //std::cout << sig << ',';
@@ -190,12 +190,12 @@ void HeaderRead::endread() {
 
         if (sig == END_OF_CENTRAL) {
             curpos += 4;//シグネチャ分ポインタ戻す
-            fin.seekg(curpos);
+            fin->seekg(curpos);
 
             //このディスクの数 2byte
             ER->discnum = 0;
             for (int i = 0; i < 2; i++) {
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 ER->discnum += readdata;
             }
@@ -204,7 +204,7 @@ void HeaderRead::endread() {
             //セントラルディレクトリが開始するディスク 2byte
             ER->disccentral = 0;
             for (int i = 0; i < 2; i++) {
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 ER->disccentral += readdata;
             }
@@ -213,7 +213,7 @@ void HeaderRead::endread() {
             //このディスク上のセントラルディレクトリレコードの数 2byte
             ER->centralnum = 0;
             for (int i = 0; i < 2; i++) {
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 ER->centralnum += readdata;
             }
@@ -223,7 +223,7 @@ void HeaderRead::endread() {
             ER->centralsum = 0;
             for (int i = 0; i < 2; i++) {
                 readdata = 0;
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 ER->centralsum += readdata;
             }
@@ -232,8 +232,8 @@ void HeaderRead::endread() {
             //セントラルディレクトリのサイズ (バイト) 4byte
             ER->size = 0;
             for (int i = 0; i < 4; i++) {
-                //fin.read((char*)&d, sizeof(char));
-                fin.read((char*)&readdata, sizeof(char));
+                //fin->read((char*)&d, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 //std::cout << "before" << readdata << std::endl;
                 readdata = (readdata & 0xFF) << (8 * i);
                 //std::cout << readdata << std::endl;
@@ -245,7 +245,7 @@ void HeaderRead::endread() {
             ER->position = 0;
             for (int i = 0; i < 4; i++) {
                 readdata = 0;
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = (readdata & 0xFF) << (8 * i);
                 ER->position += readdata;
             }
@@ -255,7 +255,7 @@ void HeaderRead::endread() {
             //セントラルディレクトリレコードの合計数 2byte
             ER->commentleng = 0;
             for (int i = 0; i < 2; i++) {
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 ER->commentleng += readdata;
             }
@@ -266,34 +266,34 @@ void HeaderRead::endread() {
             UINT32 msize = ((UINT32)ER->commentleng) + 1;
             ER->comment = (char*)malloc(msize);
             for (int i = 0; i < ER->commentleng; i++) {
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 ER->comment[i] = (readdata & 0xFF);
                 //std::cout << ER->comment[i];
             }
             //std::cout << std::endl;
-            fin.close();
+            //fin->close();
             break;
         }
         curpos--;
-        fin.seekg(curpos);
+        fin->seekg(curpos);
     }
 
 }
 //ローカルディレクトリのヘッダー情報
-void HeaderRead::localread(UINT64 pos) {
-    std::ifstream fin(readfile, std::ios::in | std::ios::binary);
+void HeaderRead::localread(UINT64 pos, std::ifstream* fin) {
+    //std::ifstream fin(readfile, std::ios::in | std::ios::binary);
     if (!fin) {
         //std::cout << "ファイル ID.txt が開けません";
     }
 
-    fin.seekg(pos, std::ios_base::beg);
+    fin->seekg(pos, std::ios_base::beg);
     sig = 0;
 
 
     /*ローカルヘッダシグネチャを読み込む*/
     while (sig != LOCAL_HEADER) {
         //先頭コードまで読み込む
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         sig = sig << 8;
         sig += readdata & 0xFF;
         //std::cout << sig << ',';
@@ -301,7 +301,7 @@ void HeaderRead::localread(UINT64 pos) {
 
     LH->version = 0;
     for (int i = 0; i < 2; i++) {
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         readdata = ((readdata & 0xFF) << (8 * i));
         LH->version += readdata;
     }
@@ -310,7 +310,7 @@ void HeaderRead::localread(UINT64 pos) {
     //汎用目的のビットフラグ
     LH->bitflag = 0;
     for (int i = 0; i < 2; i++) {
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         readdata = ((readdata & 0xFF) << (8 * i));
         LH->bitflag += readdata;
     }
@@ -319,7 +319,7 @@ void HeaderRead::localread(UINT64 pos) {
     //圧縮メソッド
     LH->method = 0;
     for (int i = 0; i < 2; i++) {
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         readdata = ((readdata & 0xFF) << (8 * i));
         LH->method += readdata;
     }
@@ -328,7 +328,7 @@ void HeaderRead::localread(UINT64 pos) {
     //ファイルの最終変更時間
     LH->time = 0;
     for (int i = 0; i < 2; i++) {
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         readdata = ((readdata & 0xFF) << (8 * i));
         LH->time += readdata;
     }
@@ -337,7 +337,7 @@ void HeaderRead::localread(UINT64 pos) {
     //ファイルの最終変更日付
     LH->day = 0;
     for (int i = 0; i < 2; i++) {
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         readdata = ((readdata & 0xFF) << (8 * i));
         LH->day += readdata;
     }
@@ -346,7 +346,7 @@ void HeaderRead::localread(UINT64 pos) {
     //CRC-32
     LH->crc = 0;
     for (int i = 0; i < 4; i++) {
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         readdata = ((readdata & 0xFF) << (8 * i));
         LH->crc += readdata;
     }
@@ -355,7 +355,7 @@ void HeaderRead::localread(UINT64 pos) {
     //圧縮サイズ
     LH->size = 0;
     for (int i = 0; i < 4; i++) {
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         readdata = ((readdata & 0xFF) << (8 * i));
         LH->size += readdata;
     }
@@ -364,7 +364,7 @@ void HeaderRead::localread(UINT64 pos) {
     //    非圧縮サイズ
     LH->nonsize = 0;
     for (int i = 0; i < 4; i++) {
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         readdata = ((readdata & 0xFF) << (8 * i));
         LH->nonsize += readdata;
     }
@@ -373,7 +373,7 @@ void HeaderRead::localread(UINT64 pos) {
     //ファイル名の長さ (n)
     LH->filenameleng = 0;
     for (int i = 0; i < 2; i++) {
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         readdata = ((readdata & 0xFF) << (8 * i));
         LH->filenameleng += readdata;
     }
@@ -382,7 +382,7 @@ void HeaderRead::localread(UINT64 pos) {
     //拡張フィールドの長さ (m)
     LH->fieldleng = 0;
     for (int i = 0; i < 2; i++) {
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         readdata = ((readdata & 0xFF) << (8 * i));
         LH->fieldleng += readdata;
     }
@@ -394,7 +394,7 @@ void HeaderRead::localread(UINT64 pos) {
     LH->filename = (char*)malloc(msize);
     if (LH->filename) {
         for (UINT16 i = 0; i < LH->filenameleng; i++) {
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             LH->filename[i] = readdata;
         }
         LH->filename[LH->filenameleng] = '\0';
@@ -405,20 +405,20 @@ void HeaderRead::localread(UINT64 pos) {
     msize = ((UINT32)LH->fieldleng) + 1;
     LH->kakutyo = (char*)malloc(msize);
     for (UINT16 i = 0; i < LH->fieldleng; i++) {
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         LH->kakutyo[i] = readdata;
         //std::cout << LH->kakutyo[i];
     }
     //std::cout << std::endl;
 
-    LH->pos = fin.tellg();//圧縮データの始まり
-    fin.close();
+    LH->pos = fin->tellg();//圧縮データの始まり
+    //fin->close();
 }
 //セントラルディレクトリのヘッダー情報
-void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n) {
+void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n, std::ifstream* fin) {
     //std::cout << std::endl;
 
-    std::ifstream fin(readfile, std::ios::in | std::ios::binary);
+    //std::ifstream fin(readfile, std::ios::in | std::ios::binary);
 
     if (!fin) {
         std::cout << "not file open" << std::endl;
@@ -426,14 +426,14 @@ void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n) {
 
     int j = 0;
 
-    fin.seekg(pos, std::ios_base::beg);
+    fin->seekg(pos, std::ios_base::beg);
 
     while (j < n) {
 
         //while (s < size) {
             /*先頭コードまで読み込む*/
         for (int i = 0; i < 4; i++) {
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             sig = sig << 8;
             sig += readdata & 0xFF;
             //std::cout << std::hex << sig << ',';
@@ -446,7 +446,7 @@ void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n) {
             //属性　GetFileAttributes?
             CD->version = 0;
             for (int i = 0; i < 2; i++) {
-                fin.read((char*)&readdata, sizeof(char));//作成者
+                fin->read((char*)&readdata, sizeof(char));//作成者
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->version += readdata;
             }
@@ -454,35 +454,35 @@ void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n) {
             //抽出に必要なバージョン（最小）
             CD->minversion = 0;
             for (int i = 0; i < 2; i++) {
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->minversion += readdata;
             }
             //std::cout << "抽出に必要なバージョン（最小：" << CD->minversion << std::endl;
             CD->bitflag = 0;
             for (int i = 0; i < 2; i++) {
-                fin.read((char*)&readdata, sizeof(char));//汎用ビットフラグ
+                fin->read((char*)&readdata, sizeof(char));//汎用ビットフラグ
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->bitflag += readdata;
             }
             //std::cout << "汎用ビットフラグ：" << CD->bitflag << std::endl;
             CD->method = 0;
             for (int i = 0; i < 2; i++) {//    圧縮方法
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->method += readdata;
             }
             //std::cout << "圧縮方法：" << CD->method << std::endl;
             CD->time = 0;
             for (int i = 0; i < 2; i++) {//    ファイルの最終変更時刻
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->time += readdata;
             }
             //std::cout << "ファイルの最終変更時刻：" << CD->time << std::endl;
             CD->day = 0;
             for (int i = 0; i < 2; i++) {//    ファイルの最終変更日
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->day += readdata;
             }
@@ -490,7 +490,7 @@ void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n) {
             //crc
             CD->crc = 0;
             for (int i = 0; i < 4; i++) {
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->crc += readdata;
             }
@@ -498,7 +498,7 @@ void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n) {
             //    圧縮サイズ
             CD->size = 0;
             for (int i = 0; i < 4; i++) {
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->size += readdata;
             }
@@ -506,7 +506,7 @@ void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n) {
             //    非圧縮サイズ
             CD->nonsize = 0;
             for (int i = 0; i < 4; i++) {
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->nonsize += readdata;
             }
@@ -514,49 +514,49 @@ void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n) {
             //    ファイル名の長さ（n)
             CD->filenameleng = 0;
             for (int i = 0; i < 2; i++) {
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->filenameleng += readdata;
             }
 
             CD->fieldleng = 0;
             for (int i = 0; i < 2; i++) {//    追加フィールド長（m）
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->fieldleng += readdata;
             }
 
             CD->fielcomment = 0;
             for (int i = 0; i < 2; i++) {//    ファイルのコメント長（k）
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->fielcomment += readdata;
             }
 
             CD->discnum = 0;
             for (int i = 0; i < 2; i++) {//    ファイルが始まるディスク番号
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = (readdata << (8 * i));
                 CD->discnum += readdata;
             }
             //std::cout << "ファイルが始まるディスク番号：" << CD->discnum << std::endl;
             CD->zokusei = 0;
             for (int i = 0; i < 2; i++) {//        内部ファイル属性
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->zokusei += readdata;
             }
             //std::cout << "内部ファイル属性：" << CD->zokusei << std::endl;
             CD->gaibuzokusei = 0;
             for (int i = 0; i < 4; i++) {//    外部ファイル属性
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->gaibuzokusei += readdata;
             }
             //std::cout << "外部ファイル属性：" << CD->gaibuzokusei << std::endl;
             CD->localheader = 0;
             for (int i = 0; i < 4; i++) {//    ローカルファイルヘッダの相対オフセット
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 readdata = ((readdata & 0xFF) << (8 * i));
                 CD->localheader += readdata;
             }
@@ -566,7 +566,7 @@ void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n) {
             UINT32 msize = ((UINT32)CD->filenameleng) + 1;
             CD->filename = (char*)malloc(msize);
             for (int i = 0; i < CD->filenameleng; i++) {//    ファイル名
-                fin.read((char*)&headerReaddata, sizeof(char));
+                fin->read((char*)&headerReaddata, sizeof(char));
                 CD->filename[i] = headerReaddata;
                 //std::cout << CD->filename[i];
             }
@@ -578,7 +578,7 @@ void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n) {
             if (CD->fieldleng > 0) {
                 CD->kakutyo = (char*)malloc(msize);
                 for (int i = 0; i < CD->fieldleng; i++) {//    拡張フィールド
-                    fin.read((char*)&readdata, sizeof(char));
+                    fin->read((char*)&readdata, sizeof(char));
                     CD->kakutyo[i] = readdata & 0xFF;
                     //std::cout << CD->kakutyo[i];
                 }
@@ -590,7 +590,7 @@ void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n) {
             if (CD->fielcomment > 0) {
                 CD->comment = (char*)malloc(msize);
                 for (int i = 0; i < CD->fielcomment; i++) {//ファイルコメント
-                    fin.read((char*)&readdata, sizeof(char));
+                    fin->read((char*)&readdata, sizeof(char));
                     CD->comment[i] = readdata & 0xFF;
                     //std::cout << CD->comment[i];
                 }
@@ -602,12 +602,12 @@ void HeaderRead::centerread(UINT64 pos, UINT32 size, UINT16 n) {
         }
         j++;
     }
-    fin.close();
+    //fin->close();
 }
 
-CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char* fn)
+CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char* fn, std::ifstream* fin)
 {
-    std::ifstream fin(readfile, std::ios::in | std::ios::binary);
+    //std::ifstream fin(readfile, std::ios::in | std::ios::binary);
 
     bool flag = false;
 
@@ -615,11 +615,11 @@ CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char*
         std::cout << "not file open" << std::endl;
     }
 
-    fin.seekg(pos, std::ios_base::beg);
+    fin->seekg(pos, std::ios_base::beg);
 
     /*先頭コードまで読み込む*/
     for (int i = 0; i < 4; i++) {
-        fin.read((char*)&readdata, sizeof(char));
+        fin->read((char*)&readdata, sizeof(char));
         sig = sig << 8;
         sig += readdata & 0xFF;
     }
@@ -627,42 +627,42 @@ CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char*
     if (sig == CENTRALSIGNATURE) {
         scd->version = 0;
         for (int i = 0; i < 2; i++) {
-            fin.read((char*)&readdata, sizeof(char));//作成者
+            fin->read((char*)&readdata, sizeof(char));//作成者
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->version += readdata;
         }
         //std::cout << "作成バージョン：" << scd->version << std::endl;
         scd->minversion = 0;
         for (int i = 0; i < 2; i++) {
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->minversion += readdata;
         }
         //std::cout << "抽出に必要なバージョン（最小：" << scd->minversion << std::endl;
         scd->bitflag = 0;
         for (int i = 0; i < 2; i++) {
-            fin.read((char*)&readdata, sizeof(char));//汎用ビットフラグ
+            fin->read((char*)&readdata, sizeof(char));//汎用ビットフラグ
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->bitflag += readdata;
         }
         //std::cout << "汎用ビットフラグ：" << scd->bitflag << std::endl;
         scd->method = 0;
         for (int i = 0; i < 2; i++) {//    圧縮方法
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->method += readdata;
         }
         //std::cout << "圧縮方法：" << scd->method << std::endl;
         scd->time = 0;
         for (int i = 0; i < 2; i++) {//    ファイルの最終変更時刻
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->time += readdata;
         }
         //std::cout << "ファイルの最終変更時刻：" << scd->time << std::endl;
         scd->day = 0;
         for (int i = 0; i < 2; i++) {//    ファイルの最終変更日
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->day += readdata;
         }
@@ -670,7 +670,7 @@ CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char*
         //crc
         scd->crc = 0;
         for (int i = 0; i < 4; i++) {
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->crc += readdata;
         }
@@ -678,7 +678,7 @@ CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char*
         //    圧縮サイズ
         scd->size = 0;
         for (int i = 0; i < 4; i++) {
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->size += readdata;
         }
@@ -686,7 +686,7 @@ CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char*
         //    非圧縮サイズ
         scd->nonsize = 0;
         for (int i = 0; i < 4; i++) {
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->nonsize += readdata;
         }
@@ -694,35 +694,35 @@ CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char*
         //    ファイル名の長さ（n)
         scd->filenameleng = 0;
         for (int i = 0; i < 2; i++) {
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->filenameleng += readdata;
         }
 
         scd->fieldleng = 0;
         for (int i = 0; i < 2; i++) {//    追加フィールド長（m）
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->fieldleng += readdata;
         }
 
         scd->fielcomment = 0;
         for (int i = 0; i < 2; i++) {//ファイルのコメント長（k）
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->fielcomment += readdata;
         }
 
         scd->discnum = 0;
         for (int i = 0; i < 2; i++) {//ファイルが始まるディスク番号
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = (readdata << (8 * i));
             scd->discnum += readdata;
         }
 
         scd->zokusei = 0;
         for (int i = 0; i < 2; i++) {//内部ファイル属性
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->zokusei += readdata;
         }
@@ -730,7 +730,7 @@ CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char*
 
         scd->gaibuzokusei = 0;
         for (int i = 0; i < 4; i++) {//    外部ファイル属性
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->gaibuzokusei += readdata;
         }
@@ -738,7 +738,7 @@ CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char*
 
         scd->localheader = 0;
         for (int i = 0; i < 4; i++) {//    ローカルファイルヘッダの相対オフセット
-            fin.read((char*)&readdata, sizeof(char));
+            fin->read((char*)&readdata, sizeof(char));
             readdata = ((readdata & 0xFF) << (8 * i));
             scd->localheader += readdata;
         }
@@ -746,7 +746,7 @@ CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char*
         UINT32 msize = ((UINT32)scd->filenameleng) + 1;
         scd->filename = (char*)malloc(msize);
         for (int i = 0; i < scd->filenameleng; i++) {//    ファイル名
-            fin.read((char*)&headerReaddata, sizeof(char));
+            fin->read((char*)&headerReaddata, sizeof(char));
             scd->filename[i] = headerReaddata;
         }
         scd->filename[scd->filenameleng] = '\0';
@@ -756,7 +756,7 @@ CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char*
             msize = ((UINT32)scd->fieldleng) + 1;
             scd->kakutyo = (char*)malloc(msize);
             for (int i = 0; i < scd->fieldleng; i++) {//    拡張フィールド
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 scd->kakutyo[i] = readdata & 0xFF;
             }
         }
@@ -765,18 +765,18 @@ CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char*
             msize = ((UINT32)scd->fielcomment) + 1;
             scd->comment = (char*)malloc(msize);
             for (int i = 0; i < scd->fielcomment; i++) {//ファイルコメント
-                fin.read((char*)&readdata, sizeof(char));
+                fin->read((char*)&readdata, sizeof(char));
                 scd->comment[i] = readdata & 0xFF;
             }
         }
         
         sig = 0;
 
-        readpos = fin.tellg();
+        readpos = fin->tellg();
     }
     filenum++;
 
-    fin.close();
+    //fin->close();
 
     if (flag)
         return scd;

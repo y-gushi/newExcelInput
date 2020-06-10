@@ -182,7 +182,7 @@ ColorAnSize* MargeaSearch::splitColor(UINT8* cstr) {
         spl = 0;
         while (spl<colorend) {// ()とばす
             if (splitspace[spl] == '(') {
-                while (splitspace[spl - 1] != ')')
+                while (splitspace[spl] != ')')
                     spl++;
             }
             /*if (std::isdigit(split[spl]) && spl > 2) {//数字
@@ -196,9 +196,9 @@ ColorAnSize* MargeaSearch::splitColor(UINT8* cstr) {
         }
         scol[sp] = '\0';
 
-        while (splitspace[sp - 1] == 128 || splitspace[sp - 1] == 227) {// スペースとばす
+        /*while (splitspace[sp - 1] == 128 || splitspace[sp - 1] == 227) {// スペースとばす
             sp--;
-        }        
+        }*/        
 
         msize = (UINT32)sp + 1;
         cas->color = (UINT8*)malloc(msize);
@@ -209,8 +209,8 @@ ColorAnSize* MargeaSearch::splitColor(UINT8* cstr) {
                 cas->color[k] = scol[k];
             cas->color[sp] = '\0';
 
-             //std::string color = itemchange.CharChenge(cas->color);
-            //std::cout << "split文字 : " << color << " size : " << cas->size << std::endl;
+            std::string color = itemchange.CharChenge(cas->color);
+            std::cout << "split文字 : " << color << " size : " << cas->size << std::endl;
 
             free(scol); free(split); free(ssiz); free(splitspace);
         }

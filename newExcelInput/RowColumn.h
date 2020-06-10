@@ -92,6 +92,7 @@ public:
     Row* searchRow(Row* r, UINT32 newrow);
     Pane* addpanetable(Pane* p, UINT8* x, UINT8* y, UINT8* tl, UINT8* ap, UINT8* sta);
     void getfinalstr();
+
     void Ctablefree(C* c);
     void Rowtablefree();
     void selectfree();
@@ -112,4 +113,6 @@ public:
     void writecells();
     void writec(C* ctag, UINT8* ROW);
     void writefinal();
+
+    UINT8* StrInit();
 };
