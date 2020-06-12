@@ -522,7 +522,24 @@ void DeflateDecode::noCompressRead()
 }
 
 UINT64 DeflateDecode::dataread(UINT64 position, UINT32 size) {
-
+    /*if (lenroot)
+        freetree(lenroot);
+    if (root)
+        freetree(root);
+    if (signs)
+        free(signs);
+    if (lentable)
+        free(lentable);
+    if (lenlen)
+        free(lenlen);
+    if (lenval)
+        free(lenval);
+    if (hufftable)
+        free(hufftable);
+    if (hufval)
+        free(hufval);
+    if (lenh)
+        free(lenh);*/
 
     fr->seekg(position, std::ios::beg);
 

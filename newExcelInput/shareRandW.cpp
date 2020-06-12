@@ -105,7 +105,7 @@ UINT8* shareRandD::writeshare(UINT8* instr, int instrlen,char **substr,UINT8 **s
     UINT8 siend[] = "</si>";
     UINT8 siendslide[6] = { 0 };
 
-    UINT32 datalen = UINT32(sdlen) + 2000;//データ長
+    UINT32 datalen = UINT32(sdlen) + 5000;//データ長
 
     UINT8* writedata = (unsigned char*)malloc(datalen);
 
@@ -118,10 +118,10 @@ UINT8* shareRandD::writeshare(UINT8* instr, int instrlen,char **substr,UINT8 **s
     int sislide = 0;
     int datapos = 0;
 
-    int stocksic = sicount;
+    int stocksic = siunique;
 
     for (int i = 0; i < INstrCount; i++) {
-        if (!submath) {
+        if (!submath[i]) {
             sicount++;//1タグ分増やす
             siunique++;
         }
@@ -203,7 +203,7 @@ UINT8* shareRandD::writeshare(UINT8* instr, int instrlen,char **substr,UINT8 **s
     const char ssi[] = "</t></si>";
     int nmc = 0;
 
-    sicount = stocksic;//sicount書き込み前の数に
+    siunique = stocksic;//sicount書き込み前の数に
 
     //メイン日付文字列追加
     for (int i = 0; i < strlen(si); i++) {
@@ -214,7 +214,7 @@ UINT8* shareRandD::writeshare(UINT8* instr, int instrlen,char **substr,UINT8 **s
         writedata[writeleng] = instr[i];
         writeleng++;
     }
-    sicount++;
+    siunique++;
     for (int i = 0; i < strlen(esi); i++) {
         writedata[writeleng] = esi[i];
         writeleng++;
@@ -222,27 +222,35 @@ UINT8* shareRandD::writeshare(UINT8* instr, int instrlen,char **substr,UINT8 **s
 
     //サブ文字列追加
     for (int j = 0; j < INstrCount; j++) {
-        if (!submath) {//siになければ書き込み
+        if (!submath[j]) {//siになければ書き込み
             for (int i = 0; i < strlen(si); i++) {
                 writedata[writeleng] = si[i];
                 writeleng++;
             }
             nmc = 0;
+            UINT8* stockstr=nullptr;
             while (substr[j][nmc] != '\0') {
                 writedata[writeleng] = substr[j][nmc];
                 nmc++; writeleng++;
-                submath[j] = st.InttoChar(sicount, &sicount_place);//si番号入れる
-                sicount++;
             }
+            submath[j] = (UINT8*)malloc(nmc + 1);
+            stockstr = st.InttoChar(siunique, &sicount_place);//si番号入れる
+            
+                                                              //別メモリー確保　コピー
+            submath[j] = (UINT8*)malloc(sicount_place + 1);
+            for (int y = 0; y < sicount_place; y++)
+                submath[j][y] = stockstr[y];
+            submath[j][sicount_place] = '\0';
+
+            std::cout << "si number : " << submath[j] << std::endl;
+            siunique++;
             for (int i = 0; i < strlen(ssi); i++) {
                 writedata[writeleng] = ssi[i];
                 writeleng++;
             }
         }
-        std::cout << "si number : " << submath << std::endl;
     }
     
-
     //write to end
     while (datapos < sdlen) {
         writedata[writeleng] = sd[datapos];//データコピー
@@ -260,17 +268,24 @@ UINT8* shareRandD::writeshare(UINT8* instr, int instrlen,char **substr,UINT8 **s
 UINT8* shareRandD::searchSi(char* s) {
     int result = 0;
     int place = 0;
+    int j = 0;
+    //std::cout <<"si 検索　：　"<< s << std::endl;
+    while (s[j] != '\0')
+        j++;
     UINT8* num = nullptr;
     for (int i = 0; i < mycount; i++) {
-        result = strcmp((const char*)sis[i]->Ts, s);
+        result = strncmp((const char*)sis[i]->Ts, s,j);
         if (result == 0) {//文字列一致
             num=st.InttoChar(i,&place);//intをcharへ
+            std::cout << "si 一致" << num << std::endl;
 
             return num;
         }
     }
+    num = (UINT8*)malloc(1);
+    num = nullptr;
 
-    return nullptr;
+    return num;
 }
 
 //share を配列へ入れる

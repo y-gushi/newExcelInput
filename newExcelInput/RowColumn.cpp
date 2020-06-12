@@ -449,7 +449,7 @@ void Ctags::GetSheetPr() {
 }
 
 //row テーブル追加
-Row* Ctags::addrows(Row* row, UINT32 r, UINT8* spanS, UINT8* spanE, UINT8* ht, UINT8* thickBot, UINT8* s, UINT8* customFormat, UINT8* customHeight)
+Row* Ctags::addrows(Row* row, UINT32 r, UINT8* spanS, UINT8* spanE, UINT8* ht, UINT8* thickBot, UINT8* s, UINT8* customFormat, UINT8* customHeight,C* cell)
 {
     if (!row) {
         row = (Row*)malloc(sizeof(Row));
@@ -462,9 +462,34 @@ Row* Ctags::addrows(Row* row, UINT32 r, UINT8* spanS, UINT8* spanE, UINT8* ht, U
             row->r = r;
             row->customFormat = customFormat;
             row->customHeight = customHeight;
-            row->cells = nullptr;
+            row->cells = cell;
             row->next = nullptr;
         }
+    }
+    else if (r < row->r) {
+        Row *newr= (Row*)malloc(sizeof(Row));
+        //別メモリ保存
+        newr->s = row->s;
+        newr->spanS = row->spanS;
+        newr->spanE = row->spanE;
+        newr->ht = row->ht;
+        newr->thickBot = row->thickBot;
+        newr->r = row->r;
+        newr->customFormat = row->customFormat;
+        newr->customHeight = row->customHeight;
+        newr->cells = row->cells;
+        newr->next = row->next;
+
+        row->s = s;
+        row->spanS = spanS;
+        row->spanE = spanE;
+        row->ht = ht;
+        row->thickBot = thickBot;
+        row->r = r;
+        row->customFormat = customFormat;
+        row->customHeight = customHeight;
+        row->cells = cell;
+        row->next = newr;
     }
     else if (r == row->r) {//行番号同じ　更新
         row->s = s;
@@ -475,9 +500,10 @@ Row* Ctags::addrows(Row* row, UINT32 r, UINT8* spanS, UINT8* spanE, UINT8* ht, U
         row->r = r;
         row->customFormat = customFormat;
         row->customHeight = customHeight;
+        row->cells = cell;
     }
     else {
-        row->next = addrows(row->next, r, spanS, spanE, ht, thickBot, s, customFormat, customHeight);
+        row->next = addrows(row->next, r, spanS, spanE, ht, thickBot, s, customFormat, customHeight,cell);
     }
     return row;
 }
@@ -490,7 +516,9 @@ Row* Ctags::searchRow(Row* r, UINT32 newrow) {
         }
         sr = sr->next;
     }
-    return nullptr;
+
+    sr = (Row*)malloc(sizeof(Row)); sr = nullptr;
+    return sr;
 }
 //row内容取得 配列に p >まで
 void Ctags::Getrow() {
@@ -635,7 +663,7 @@ void Ctags::Getrow() {
             cf[vlen] = '\0';
         }
     }
-    rows = addrows(rows, rownum, sps, spe, h, tb, s, cf, ch);
+    rows = addrows(rows, rownum, sps, spe, h, tb, s, cf, ch,nullptr);
     free(cusf); free(spa); free(ht);
     free(rb); free(rs);
 }

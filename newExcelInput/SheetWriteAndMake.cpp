@@ -21,10 +21,50 @@ void Ctags::addcelldata(UINT8* row, UINT8* col, UINT8* t, UINT8* s, UINT8* v, F*
     }
 
     ro = searchRow(rows, rn);//row位置検索
-    std::cout << " 追加 v : " << v << std::endl;
-    ro->cells = addCtable(ro->cells, t, s, si, cn, v, f);//セル情報検索
-    cn = NA.ColumnCharnumtoNumber(cn);//列番号連番へ　入れた列
+    if (!ro) {
+        std::cout << "row なし 追加" << std::endl;
+        UINT8 spanSt[] = "1";//行スタート位置
+        UINT8* spanEn = col;//行終わり
+        UINT8 HT[] = "29.25";
+        UINT8* thick = (UINT8*)malloc(1); thick = nullptr;
+        UINT8* s = (UINT8*)malloc(1); s = nullptr;
+        UINT8* CF = (UINT8*)malloc(1); CF = nullptr;
+        UINT8 CH[] = "1";//customhigh
+        rows=addrows(rows, rn, spanSt, spanEn, HT, thick, s, CF, CH,nullptr);
 
+        ro = searchRow(rows, rn);
+    }
+    std::cout << " 追加 v : " << v << std::endl;
+
+    //入れるcellの前がなければ入れる
+    C* Croot = ro->cells;
+    while (Croot->next) {
+        Croot = Croot->next;
+    }
+    UINT32 colnum_start = NA.ColumnCharnumtoNumber(Croot->col);//文字数字を数字に
+    colnum_start++;
+    UINT32 colnum_end = NA.ColumnCharnumtoNumber(cn);
+
+    while (colnum_start <= colnum_end) {
+        if (colnum_start == colnum_end) {
+            UINT32 incolnum = NA.NumbertoArray(colnum_start);//数字を文字数時に
+            ro->cells = addCtable(ro->cells, t, s, si, incolnum, v, f);
+        }
+        else {
+            UINT32 incolnum = NA.NumbertoArray(colnum_start);//数字を文字数時に
+            UINT8* n1 = (UINT8*)malloc(1); n1 = nullptr;
+            UINT8* n2 = (UINT8*)malloc(1); n2 = nullptr;
+            UINT8* n3 = (UINT8*)malloc(1); n3 = nullptr;
+            F* n4 = (F*)malloc(sizeof(F)); n4 = nullptr;
+            ro->cells = addCtable(ro->cells, n1, s, n2, incolnum, n3, n4);
+        }
+        NA.ColumnIncliment(&colnum_start);
+        colnum_start++;
+    }
+    
+    //ro->cells = addCtable(ro->cells, t, s, si, cn, v, f);//セル情報検索
+    cn = NA.ColumnCharnumtoNumber(cn);//列番号連番へ　入れた列
+    
     if (replace) {//最大値更新で　cols style確認
         cols* ncols = cls;
         while (ncols->next)//cols　最後参照
@@ -50,7 +90,7 @@ void Ctags::addcelldata(UINT8* row, UINT8* col, UINT8* t, UINT8* s, UINT8* v, F*
 }
 
 void Ctags::writesheetdata() {
-    size_t msize= size_t(dlen) + 6000;
+    size_t msize= size_t(dlen) + 8000;
 
     wd = (UINT8*)malloc(msize);//メモリサイズ変更　書き込み用
     //std::cout << "データ更新" << p << std::endl;

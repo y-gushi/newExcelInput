@@ -8,14 +8,20 @@ searchItemNum::searchItemNum(Items* itemstruct, Ctags* cs) {
     intxtCount = 0;
 }
 
+searchItemNum::~searchItemNum() {
+
+}
+
 char** searchItemNum::slipInputText(char* ins) {
     int i = 0;
     
     while (ins[i] != '\0') {
-        if (ins[i] == '\n')//改行数 コメント数　改行で行分ける
+        if (ins[i] == ',')//改行数 コメント数　改行で行分ける
             intxtCount++;
+        std::cout << ins[i];
         i++;
     }
+
     intxtCount++;//最終行プラス
 
     char** instrs = (char**)malloc(intxtCount);
@@ -24,15 +30,17 @@ char** searchItemNum::slipInputText(char* ins) {
     i = 0;
     int stockpos = 0;
     while (j < intxtCount) {
-        while (ins[i] != '\n' && ins[i] != '\0') {
+        while (ins[i] != ',' && ins[i] != '\0') {
             i++;
         }
+        std::cout << "文字数：" << i << std::endl;
         int strleng = i-stockpos;
-        instrs[j] = (char*)malloc(strleng + 1);
+        size_t msize = size_t(strleng) + 2;
+        instrs[j] = (char*)malloc(msize);
         for (int t = 0; t < strleng; t++)
             instrs[j][t] = ins[stockpos+t];
         instrs[j][strleng] = '\0';
-        std::cout << "入力テキスト：" << instrs[j] << std::endl;
+        std::cout << "入力テキスト：" << instrs[j]<<" "<<strleng << std::endl;
         i++;//改行　スキップ
         stockpos = i;//スタート位置更新
 
@@ -87,12 +95,16 @@ bool searchItemNum::searchitemNumber(UINT8* uniq,UINT8** siNumbers,int sicounts)
     if (!incellflag)
         return false;//品番一致なし
     else {
+        std::cout << "一致品番 : " << Item->itn << std::endl;
         int rowslide = startR;
         Cels->addcelldata(nr, incolumn, (UINT8*)SaT[0], (UINT8*)SaT[1], uniq, nullptr, nullptr);//最初の一回に変更 メインの日付追加
         //サブ文字列追加
         for (int i = (sicounts - 1); i >= 0; i--) {
             rowslide--;
             UINT8* srow= changenum.InttoChar(rowslide, &result);
+            if (!siNumbers[i])
+                return false;
+            std::cout << "入力文字 : " << siNumbers[i]<<"  "<<i << std::endl;
             Cels->addcelldata(srow, incolumn, (UINT8*)SaT[0], (UINT8*)SaT[1], siNumbers[i], nullptr, nullptr);
         }
     }

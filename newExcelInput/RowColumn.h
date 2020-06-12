@@ -88,7 +88,7 @@ public:
     cols* addcolatyle(cols* cs, UINT8* min, UINT8* max, UINT8* W, UINT8* sty, UINT8* hid, UINT8* bF, UINT8* cuW);
     cols* coltalloc();
     selection* SLTaddtable(selection* s, UINT8* pv, UINT8* av, UINT8* sv);
-    Row* addrows(Row* row, UINT32 r, UINT8* spanS, UINT8* spanE, UINT8* ht, UINT8* thickBot, UINT8* s, UINT8* customFormat, UINT8* customHeight);//rowèÓïÒÅ@cellèÓïÒí«â¡
+    Row* addrows(Row* row, UINT32 r, UINT8* spanS, UINT8* spanE, UINT8* ht, UINT8* thickBot, UINT8* s, UINT8* customFormat, UINT8* customHeight,C* cell);//rowèÓïÒÅ@cellèÓïÒí«â¡
     Row* searchRow(Row* r, UINT32 newrow);
     Pane* addpanetable(Pane* p, UINT8* x, UINT8* y, UINT8* tl, UINT8* ap, UINT8* sta);
     void getfinalstr();

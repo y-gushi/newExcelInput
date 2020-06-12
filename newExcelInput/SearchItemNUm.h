@@ -19,6 +19,7 @@ public:
     int intxtCount=0;
 
     searchItemNum(struct Items* itemstruct, Ctags* cs);
+    ~searchItemNum();
     char** slipInputText(char* ins);//入力テキスト分割
     UINT32 startR = 0;
     UINT32 inputColum = 0;
