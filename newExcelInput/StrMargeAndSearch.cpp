@@ -243,6 +243,7 @@ int MargeaSearch::seachcharactors(UINT8* str, UINT8* data, UINT32 dataleng, int 
         i++;//文字列の数
     UINT32 msize = (UINT32)i + 1;
     UINT8* sp = (UINT8*)malloc(msize);//検索スライド用
+    memset(sp, 0, msize);
 
     UINT32 p = (UINT32)startpos;
 
@@ -262,6 +263,8 @@ int MargeaSearch::seachcharactors(UINT8* str, UINT8* data, UINT32 dataleng, int 
         }
 
     }
+
+    free(sp);
     return -1;
 }
 //2 文字列結合

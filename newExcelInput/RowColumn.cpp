@@ -70,11 +70,12 @@ Ctags::Ctags(UINT8* decorddata, UINT64 datalen, shareRandD* shdata)
 //デストラクタ
 Ctags::~Ctags()
 {
+    
     Rowtablefree();
     selectfree();
     colfree();
     panefree();
-
+    
     free(headXML);
     free(dimtopane);
     free(sFPr);
@@ -85,6 +86,7 @@ Ctags::~Ctags()
     //free(MC);
     free(fstr);
     free(wd);
+    
 }
 
 //c tag vを配列へ
@@ -207,16 +209,14 @@ void Ctags::GetCtagValue() {
                 }
                 free(col); free(row);
                 col = nullptr; row = nullptr;
-                if (Tv)Tv = StrInit();
-                if (Sv)Sv = StrInit();
-                if (ft)ft = StrInit();
-                if (fre)fre = StrInit();
-                if (fsi)fsi = StrInit();
-                if (fv)fv = StrInit();
-                if (Vv)Vv = StrInit();
-                if (fvs) {
-                    fvs = (F*)malloc(sizeof(F)); fvs = nullptr;
-                }
+                Tv = StrInit();
+                Sv = StrInit();
+                ft = StrInit();
+                fre = StrInit();
+                fsi = StrInit();
+                fv = StrInit();
+                Vv = StrInit();
+                fvs = (F*)malloc(sizeof(F)); fvs = nullptr;
                 ft = 0;
             }
             else {//get v tag
@@ -292,8 +292,9 @@ void Ctags::GetCtagValue() {
                         else {
                             //not share data str or v in
                             Srow = searchRow(rows, rownum);
+                            UINT8* Vsi = StrInit();
                             if (Srow) {
-                                Srow->cells = addCtable(Srow->cells, Tv, Sv, nullptr, colnum, Vv, fvs);
+                                Srow->cells = addCtable(Srow->cells, Tv, Sv, Vsi, colnum, Vv, fvs);
                             }
                             else {
                                 //need make new row
@@ -301,17 +302,17 @@ void Ctags::GetCtagValue() {
                         }
                         free(col); free(row);
                         col = nullptr; row = nullptr;
-                        if (Tv)Tv = StrInit();
-                        if (Sv)Sv = StrInit();
-                        if (ft)ft = StrInit();
-                        if (fre)fre = StrInit();
-                        if (fsi)fsi = StrInit();
-                        if (fv)fv = StrInit();
-                        if (Vv)Vv = StrInit();
-                        if (fvs) {
-                            fvs = (F*)malloc(sizeof(F)); fvs = nullptr;
-                        }
+                        Tv = StrInit();
+                        Sv = StrInit();
+                        ft = StrInit();
+                        fre = StrInit();
+                        fsi = StrInit();
+                        fv = StrInit();
+                        Vv = StrInit();
+                        fvs = (F*)malloc(sizeof(F)); fvs = nullptr;
                         ft = 0;
+                        //Vv = nullptr; Tv = nullptr; Sv = nullptr; col = nullptr;//初期化
+                        //fvs = nullptr; fre = nullptr; fsi = nullptr; ft = nullptr; fv = nullptr;
                     }
 
                     if (strncmp((char const*)fsl, Ftag, 2) == 0) {// <f t="shared" si="13"/>
@@ -863,9 +864,9 @@ void Ctags::GetSelectionPane() {
                 }
                 if (pa || ac || sq) {
                     sct = SLTaddtable(sct, pa, ac, sq);//構造体へコピー
-                    if (sq)sq = StrInit();
-                    if (pa)pa = StrInit();
-                    if (ac)ac = StrInit();
+                    sq = StrInit();
+                    pa = StrInit();
+                    ac = StrInit();
                 }
             }
         }
@@ -1155,13 +1156,13 @@ void Ctags::Getcols() {
                 }
             }
             cls = addcolatyle(cls, min, max, colw, style, hidd, bestf, cuw);
-            if (min)min = StrInit();
-            if(max)max = StrInit();
-            if(style)style = StrInit();
-            if(bestf)bestf = StrInit();
-            if(hidd) hidd = StrInit();
-            if(colw) colw = StrInit();
-            if(cuw)cuw = StrInit();
+            min = StrInit();
+            max = StrInit();
+            style = StrInit();
+            bestf = StrInit();
+            hidd = StrInit();
+            colw = StrInit();
+            cuw = StrInit();
 
             free(ccw); free(cbf); free(chid); free(wist); free(mimax);
         }
@@ -1214,7 +1215,9 @@ void Ctags::getfinalstr() {
     const char *margeinfo="<mergeCells count=\"";//19char
     const char *marge="<mergeCell ref=\"";//16char
     UINT8* sm=(UINT8*)malloc(20);
+    memset(sm, 0, 20);
     UINT8* Sm=(UINT8*)malloc(17);
+    memset(Sm, 0, 17);
     UINT32 fstrsize = s + 1;
     fstr = (UINT8*)malloc(fstrsize);
     int result=0;

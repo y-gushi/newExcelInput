@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <cmath>
 #include "decord.h"
-#include "SearchItemNUm.h"
 
 #define LOCAL_HEADER 0x504b0304
 /*local file header　シグネチャ 0x04034b50  0x504b0304*/
@@ -101,6 +100,13 @@ struct CDdataes {
     CDdataes* nextCD;
 };
 
+struct inputtxt {
+    UINT8* txt;
+    UINT8* sinum;
+    inputtxt* next;
+    inputtxt* parrent;
+};
+
 class HeaderRead
 {
 public:
@@ -130,6 +136,8 @@ public:
 
     UINT32 filenum = 0;//読み込み数
 
+    int intxtCount = 0;
+
     filelist* cdfn = nullptr;
 
     unsigned char* readLHdata = (unsigned char*)malloc(sizeof(unsigned char) * 100);//crcテスト用
@@ -141,6 +149,12 @@ public:
     void localread(UINT64 pos, std::ifstream* fin);
     void centerread(UINT64 pos, UINT32 size, UINT16 n, std::ifstream* fin);
     CenterDerect* centeroneread(UINT64 pos, UINT32 size, UINT16 n, char* fn, std::ifstream* fin);
+
+    inputtxt* addtxt(inputtxt* intx, char* tx, inputtxt* par);
+
+    void freetxt(inputtxt* p);
+
+    inputtxt* slipInputText(char* ins, inputtxt* it);
 
     CenterDerect* searchCENTRAL(char* s);//ファイル名でセントラルディレクトリの検索
 

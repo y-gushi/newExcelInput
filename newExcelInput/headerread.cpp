@@ -27,6 +27,7 @@ HeaderRead::~HeaderRead() {
     free(CD);
     free(cdfn);
     free(scd);
+    
 }
 
 //ファイル名でセントラルディレクトリ　データ検索
@@ -782,5 +783,78 @@ CenterDerect* HeaderRead::centeroneread(UINT64 pos, UINT32 size, UINT16 n, char*
         return scd;
 
     return nullptr;
+}
+
+inputtxt* HeaderRead::addtxt(inputtxt* intx, char* tx, inputtxt* par) {
+
+    if (!intx) {
+        intx = (inputtxt*)malloc(sizeof(inputtxt));
+        intx->parrent = par;
+        intx->txt = (UINT8*)tx;
+        intx->sinum = (UINT8*)malloc(1);
+        intx->sinum = nullptr;
+        intx->next = nullptr;
+    }
+    else {
+        intx->next = addtxt(intx->next, tx, intx);
+    }
+        
+
+    return intx;
+}
+
+void HeaderRead::freetxt(inputtxt* p) {
+    inputtxt* q;
+    while (p) {
+        q = p->next;
+        free(p);
+        p = q;
+    }
+}
+
+inputtxt* HeaderRead::slipInputText(char* ins,inputtxt* it) {
+    size_t i = 0;
+
+    while (ins[i] != '\0') {
+        if (ins[i] == ',')//改行数 コメント数　改行で行分ける
+            intxtCount++;
+        else
+            std::cout << ins[i] << ",";
+        i++;
+    }
+
+    intxtCount++;//最終行プラス
+
+    char** instrs = (char**)malloc(intxtCount);
+    //char instrs[5][255] = { 0 };
+
+    int j = 0;
+    i = 0;
+    int stockpos = 0;
+    while (j < intxtCount) {
+        while (ins[i] != ',' && ins[i] != '\0')
+            i++;
+        
+        size_t strleng = i - stockpos;
+        size_t msize = strleng + 1;
+
+        char *inst = (char*)malloc(msize);
+        std::cout << "文字数：" << i << "," << msize << std::endl;
+        if (!inst)
+            return nullptr;
+
+        for (int t = 0; t < strleng; t++)
+            inst[t] = ins[stockpos + t];
+        inst[strleng] = '\0';
+        it = addtxt(it, inst,nullptr);
+        //instrs[j] = inst;
+        //std::cout << "入力テキスト：" << instrs[j] << " " << strleng << std::endl;
+        i++;//改行　スキップ
+        stockpos = i;//スタート位置更新
+
+        j++;
+    }
+
+    return it;
 }
 

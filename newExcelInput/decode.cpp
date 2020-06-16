@@ -468,12 +468,13 @@ void DeflateDecode::CustomRead()
             fugoleng++;
         }
     }
+    
     freetree(lenroot);
-    //lenroot=nullptr;
-    //free(lenroot);
+    
     freetree(root);
-    //root=nullptr;
-    //free(root);
+    
+    freetree(hufhuf);
+    
     free(signs);
     free(lentable);
     free(lenlen);
@@ -481,6 +482,10 @@ void DeflateDecode::CustomRead()
     free(hufftable);
     free(hufval);
     free(lenh);
+    
+    lenroot = nullptr;
+    root = nullptr;
+    hufhuf = nullptr;
     //std::cout << "‰ð“€@•„†” : " << fugoleng << std::endl;
 }
 

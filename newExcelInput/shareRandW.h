@@ -3,6 +3,7 @@
 //#include "SearchItemNUm.h"
 #include "ChangeArrayNumber.h"
 #include "CRC.h"
+#include "Header.h"
 
 struct Si {
     UINT8* Ts = nullptr;
@@ -35,9 +36,11 @@ public:
 
     shareRandD(UINT8* d, UINT64 l);
     ~shareRandD();
-    void getSicount();//unique and count get
-    UINT8* writeshare(UINT8* instr, int instrlen, char** substr, UINT8** submath, int INstrCount);
-    UINT8* searchSi(char* s);
+    void getSicount();
+    UINT8* writeshare(UINT8* instr, int instrlen, inputtxt* substr, int INstrCount);
+    inputtxt* searchSi(inputtxt* ipt);
+    //unique and count get
+
     //share str plus
     Si* addSitable(Si* s, UINT8* str);
     void Sitablefree(Si* s);

@@ -11,7 +11,34 @@
 #include "ZipFilewrite.h"
 #include "shareRandW.h"
 #include "RowColumn.h"
+
+#include <codecvt>
+
 //#include <crtdbg.h>//メモリリーク用
+
+std::wstring multi_to_wide_capi(std::string const& src)
+{
+    std::size_t converted{};
+    std::vector<wchar_t> dest(src.size(), L'\0');
+    if (::_mbstowcs_s_l(&converted, dest.data(), dest.size(), src.data(), _TRUNCATE, ::_create_locale(LC_ALL, "jpn")) != 0) {
+        throw std::system_error{ errno, std::system_category() };
+    }
+    dest.resize(std::char_traits<wchar_t>::length(dest.data()));
+    dest.shrink_to_fit();
+    return std::wstring(dest.begin(), dest.end());
+}
+
+std::string wide_to_utf8_cppapi(std::wstring const& src)
+{
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    return converter.to_bytes(src);
+}
+
+std::string multi_to_utf8_cppapi(std::string const& src)
+{
+    auto const wide = multi_to_wide_capi(src);
+    return wide_to_utf8_cppapi(wide);
+}
 
 int main(char* fname[], int i) {
 
@@ -22,8 +49,10 @@ int main(char* fname[], int i) {
     char Zfn[] = "C:/Users/Bee/Desktop/【1 縦売り 夏】在庫状況.xlsx";
     char mfile[] = "C:/Users/Bee/Desktop/test[システム].xlsx"; //テスト書き出し
     char recd[] = "C:/Users/Bee/Desktop/Centraldata"; //テスト書き出し
-
-    char inputStr[] = "2020,ship,5/19着";
+    
+    char inputStr[] = "2020,ship,5/19着";//shift-jis
+    std::string conv = multi_to_utf8_cppapi(inputStr);//utf8へ
+    const char* newinput = conv.c_str();
 
     /*-----------------------
      シェアー文字列読み込み
@@ -39,7 +68,7 @@ int main(char* fname[], int i) {
 
     DeflateDecode* decShare = new DeflateDecode(&PLR);//sharestring ファイルの保存用
     //share セントラル取得
-    while (hr->filenum < hr->ER->centralsum) {
+    while (hr->filenum < hr->ER->centralsum) {//cddata mallocなし
         cddata = hr->centeroneread(hr->readpos, hr->ER->size, hr->ER->centralsum, shares, &PLR);
         if (cddata) {
             break;
@@ -89,9 +118,6 @@ int main(char* fname[], int i) {
 
     sg->GetItems();//mallocなし　シートとセット
 
-    delete sharray;
-    delete hr;
-
     PLR.close();
 
     /*-----------------------
@@ -115,43 +141,42 @@ int main(char* fname[], int i) {
     }
 
     //入力テキスト文字分ける
-    searchItemNum* spltxt=new searchItemNum(nullptr,nullptr);
     char** splstr = nullptr;
-    splstr=spltxt->slipInputText(inputStr);//分割テキスト
-    int txtnum = spltxt->intxtCount;//テキスト数
+    inputtxt* inptxt = nullptr;
+    inptxt = hr2->slipInputText((char*)newinput, inptxt);//分割テキスト
+    inputtxt* rootintxt = inptxt;
 
-    //delete spltxt;//文字分け終了　解放
+    int txtnum = hr2->intxtCount;//テキスト数
 
+    delete sharray;
+    delete hr;
+    
     sharray = new shareRandD(decShare->ReadV, decShare->readlen);//share 再初期化 検索用に呼び出し
     sharray->getSicount();//get si count
     sharray->ReadShare();//文字列読み込み
 
+    //delete decShare;
     //share 検索　あったら番号取得
-    int ma = 0;
-    UINT8** instrFlag = (UINT8**)malloc(txtnum);
-    for (int j = 0; j < txtnum; j++) {
-        instrFlag[j] = sharray->searchSi(splstr[j]);//マッチした文字列のSi番号取得　なければnullptr
-        //std::cout << "siflag : " << splstr[o] << std::endl;
-    }
 
+    int ma = 0;
+    //UINT8** instrFlag = (UINT8**)malloc(txtnum);
+
+    rootintxt = sharray->searchSi(rootintxt);//マッチした文字列のSi番号取得　なければnullptr
+
+    
     //シェアー書き込み
     UINT8* sharedata = nullptr;
-    std::cout << "day : " << sg->day << std::endl;
-    sharedata= sharray->writeshare(sg->day, sg->daylen, splstr, instrFlag, txtnum);//share文字列書き込み share data更新
-    UINT64 shrelength = sharray->writeleng;
     
-    for (int o = 0; o < txtnum; o++) {
-        if (instrFlag[o]) {
-            std::cout << "siflag : " << instrFlag[o] << " " << splstr[o] << std::endl;
-        }
-    }
-   /*
-    delete sharray;
+    std::cout << "day : " << sg->day << std::endl;
+    sharedata= sharray->writeshare(sg->day, sg->daylen, inptxt, txtnum);//share文字列書き込み share data更新
+    UINT64 shrelength = sharray->writeleng;
 
+    /*
+    delete sharray;
     sharray = new shareRandD(sharedata, shrelength);//更新したシェアデータを配列に
     sharray->getSicount();//get si count
     sharray->ReadShare();//文字列読み込み
-   */ 
+    */
     //free(sharedata);
     /*for (int t = 0; t < txtnum; t++) {//文字列解放
         free(splstr[t]);
@@ -160,7 +185,7 @@ int main(char* fname[], int i) {
     /*--------------------------
     share data書き込み　圧縮
     ---------------------------*/
-    
+ 
     //ファイル書き出し用
     _Post_ _Notnull_ FILE* cdf;
     fopen_s(&cdf, recd, "wb");
@@ -181,7 +206,7 @@ int main(char* fname[], int i) {
 
     encoding* shenc = new encoding;//sharestring 圧縮
     shenc->compress(sharedata, shrelength);
-    delete decShare;//シェアー解凍データ削除
+    free(sharedata);
 
     if (cddata) {
         localSize = hw.localwrite(fpr, dd.times, sharray->buckcrc, shenc->datalen, sharray->writeleng, cddata->filenameleng, cddata->filename, cddata->version, cddata->bitflag, cddata->method);
@@ -202,18 +227,19 @@ int main(char* fname[], int i) {
 
     shenc->write(fpr);//圧縮データの書き込み
     
+    delete decShare;//シェアー解凍データ削除
     delete shenc;//share圧縮データ削除
-    
+  
      /*-----------------------
     発注到着シート読み込み
     -----------------------*/
-    
+ 
     DeflateDecode* Hdeco;
-    char sheet[] = "worksheets/sheet6";
+    char sheet[] = "worksheets/sheet";
     const char sharefn[] = "xl/sharedStrings.xml";
     bool t = false;
     Ctags* mh;//発注到着　cell データ読み込み
-    searchItemNum* sI;//品番検索　＆　書き込み
+    searchItemNum* sI=nullptr;//品番検索　＆　書き込み
     CDdataes* slideCDdata = hr2->saveCD;//ファイル名検索用
 
     hr2->readpos = hr2->ER->position;//読み込み位置初期化
@@ -244,7 +270,7 @@ int main(char* fname[], int i) {
             sI = new searchItemNum(sg->its, mh);
 
             //std::cout << "sharray.uniqstr : " << sharray.uniqstr << std::endl;
-            t = sI->searchitemNumber(sharray->uniqstr, (UINT8**)splstr,txtnum);//品番検索　＆　セルデータ追加　シェアー消去（入れる場合は引数に）
+            t = sI->searchitemNumber(sharray->uniqstr, inptxt,txtnum);//品番検索　＆　セルデータ追加　シェアー消去（入れる場合は引数に）
 
             if (t)
             {//一致品番あった場合
@@ -262,8 +288,6 @@ int main(char* fname[], int i) {
 
                 encoding* enc = new encoding;//圧縮
                 enc->compress(mh->wd, mh->p);//データ圧縮
-
-                //if (mh->data) { free(mh->data); }//エラー
 
                 cddata->zokusei = 0x00;
                 cddata->gaibuzokusei = 0x00;
@@ -308,9 +332,9 @@ int main(char* fname[], int i) {
         }
     }
     std::cout << "end item search" << std::endl;
-    //free(cddata);
-    //free(instrFlag);
-    //delete(sharray);
+    hr2->freetxt(inptxt);//入力文字列の削除
+    
+    delete(sharray);
 
     Items* errorItem = (Items*)malloc(sizeof(Items));
     errorItem = nullptr;
@@ -355,11 +379,11 @@ int main(char* fname[], int i) {
     else {
         std::cout << "sheet no error" << std::endl;
     }
-    //free(errorItem);
-    //free(matchsroot);
+    free(errorItem);
+    free(matchsroot);
 
-    //delete sg;//アイテム　文字データ シートとセット削除
-    //delete ms;//シート　セル削除 PLシートデータ
+    delete sg;//アイテム　文字データ シートとセット削除
+    delete ms;//シート　セル削除 PLシートデータ
 
     hw.eocdwrite(cdf, hr2->ER->discnum, hr2->ER->disccentral, hr2->ER->centralnum, hr2->ER->centralsum, zip.writeposition, hw.cdsize);
 
@@ -391,6 +415,6 @@ int main(char* fname[], int i) {
         
 
     Zr.close();
-
+    
     return 0;
 }

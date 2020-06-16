@@ -8,7 +8,7 @@ shipinfo::shipinfo(Row* cel) {
 shipinfo::~shipinfo() {
     //freeItem(its);
     //free(shipday);//Œ³‚Å‰ð•ú no malloc
-    free(day);
+    //free(day);
     //ƒZƒ‹ˆø”@Œ³‚Å‰ð•ú cel no malloc
 }
 
@@ -60,12 +60,9 @@ UINT8* shipinfo::outuntil(UINT8 c, UINT8* st)
     int i = 0;
     UINT8* p = nullptr;
 
-    while (st[j] != c && st[j] != '\0') {
-        if (!isspace(st[j])) {
-            i++;
-        }
+    while (st[j] != c && st[j] != '\0')
         j++;
-    }
+    
     const UINT32 msize = (UINT32)j + 1;
     p = (UINT8*)malloc(msize);
 
@@ -327,6 +324,12 @@ void shipinfo::GetItems() {
         }
         sr = sr->next;
     }
+}
+
+UINT8* shipinfo::StrInit() {
+    UINT8* p = (UINT8*)malloc(1);
+    p = nullptr;
+    return p;
 }
 
 void shipinfo::freeItem(Items* t) {

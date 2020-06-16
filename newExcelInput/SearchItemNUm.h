@@ -16,11 +16,12 @@ struct MatchColrs
 class searchItemNum {
 
 public:
-    int intxtCount=0;
-
+    
     searchItemNum(struct Items* itemstruct, Ctags* cs);
     ~searchItemNum();
-    char** slipInputText(char* ins);//入力テキスト分割
+
+    bool searchitemNumber(UINT8* uniq, inputtxt* iptxt, int sicounts);
+
     UINT32 startR = 0;
     UINT32 inputColum = 0;
     UINT8* incolumn = nullptr;
@@ -30,7 +31,6 @@ public:
     MargeaSearch Mstr;
     MatchColrs* rootMat=nullptr;
 
-    bool searchitemNumber(UINT8* uniq, UINT8** siNumbers, int sicounts);
     void colorsearch(Row* inrow, Items* IT, UINT8* itn);
     MatchColrs* addmatches(MatchColrs* m, UINT8* i, UINT8* c);
     Items* addItems(Items* base, Items* itm);
