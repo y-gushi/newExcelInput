@@ -64,14 +64,17 @@ bool searchItemNum::searchitemNumber(UINT8* uniq,inputtxt* iptxt,int sicounts) {
         int rowslide = startR;
         Cels->addcelldata(nr, incolumn, (UINT8*)SaT[0], (UINT8*)SaT[1], uniq, nullptr, nullptr);//最初の一回に変更 メインの日付追加
         //サブ文字列追加
-        while (iptxt) {//後ろから入力
-            rowslide--;
-            UINT8* srow= changenum.InttoChar(rowslide, &result);
-            if (!iptxt->sinum)
-                return false;
-            std::cout << "入力文字 : " << iptxt->sinum << std::endl;
-            Cels->addcelldata(srow, incolumn, (UINT8*)SaT[0], (UINT8*)SaT[1], iptxt->sinum, nullptr, nullptr);
-            iptxt = iptxt->parrent;
+        if (iptxt) {
+            //サブ入力文字があれば　セルに追加
+            while (iptxt) {//後ろから入力
+                rowslide--;
+                UINT8* srow = changenum.InttoChar(rowslide, &result);
+                if (!iptxt->sinum)
+                    return false;
+                std::cout << "入力文字 : " << iptxt->sinum << std::endl;
+                Cels->addcelldata(srow, incolumn, (UINT8*)SaT[0], (UINT8*)SaT[1], iptxt->sinum, nullptr, nullptr);
+                iptxt = iptxt->parrent;
+            }
         }
     }
 

@@ -145,6 +145,7 @@
     <ClCompile Include="decode.cpp" />
     <ClCompile Include="deflate.cpp" />
     <ClCompile Include="encode.cpp" />
+    <ClCompile Include="excel_style.cpp" />
     <ClCompile Include="headerread.cpp" />
     <ClCompile Include="headerwrite.cpp" />
     <ClCompile Include="newExcelInput.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="decord.h" />
     <ClInclude Include="deflate.h" />
     <ClInclude Include="encode.h" />
+    <ClInclude Include="excel_style.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="nodeandtab.h" />
     <ClInclude Include="RowColumn.h" />

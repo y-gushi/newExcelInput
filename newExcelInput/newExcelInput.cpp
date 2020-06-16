@@ -235,7 +235,7 @@ int main(char* fname[], int i) {
     -----------------------*/
  
     DeflateDecode* Hdeco;
-    char sheet[] = "worksheets/sheet";
+    char sheet[] = "worksheets/sheet70";
     const char sharefn[] = "xl/sharedStrings.xml";
     bool t = false;
     Ctags* mh;//発注到着　cell データ読み込み

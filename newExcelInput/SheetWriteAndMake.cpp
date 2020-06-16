@@ -46,7 +46,7 @@ void Ctags::addcelldata(UINT8* row, UINT8* col, UINT8* t, UINT8* s, UINT8* v, F*
     }
     else {
         //rowあり
-        std::cout << " 追加 v : " << v << std::endl;
+        std::cout << " row あり　追加 v : " << v << std::endl;
 
         //入れるcellの前がなければ入れる
         C* Croot = ro->cells;
@@ -55,6 +55,7 @@ void Ctags::addcelldata(UINT8* row, UINT8* col, UINT8* t, UINT8* s, UINT8* v, F*
         }
 
         UINT32 incolnum = Croot->col;//現在の最終行
+        NA.ColumnIncliment(&incolnum);
 
         while (incolnum <= cn) {
             if (incolnum == cn) {
