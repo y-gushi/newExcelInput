@@ -54,6 +54,10 @@ int main(char* fname[], int i) {
     std::string conv = multi_to_utf8_cppapi(inputStr);//utf8へ
     const char* newinput = conv.c_str();
 
+    /*-----------------------------
+    入力文字チェック
+    -------------------------------*/
+
     /*-----------------------
      シェアー文字列読み込み
      -----------------------*/

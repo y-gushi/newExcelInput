@@ -3,6 +3,7 @@
 styleread::styleread()
 {
 	readp = 0;
+	fontcou = 0;
 }
 
 styleread::~styleread()
