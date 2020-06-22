@@ -14,7 +14,14 @@
 
 #include <codecvt>
 
+#include "atlbase.h"
+#include "atlstr.h"
+#include "comutil.h"
+
+#include <locale.h>
+
 //#include <crtdbg.h>//メモリリーク用
+#define BUFSIZE  256
 
 std::wstring multi_to_wide_capi(std::string const& src)
 {
@@ -40,19 +47,80 @@ std::string multi_to_utf8_cppapi(std::string const& src)
     return wide_to_utf8_cppapi(wide);
 }
 
+char* SJIStoUTF8(char* szSJIS, char* bufUTF8, int size) {
+    wchar_t bufUnicode[BUFSIZE];
+    int lenUnicode = MultiByteToWideChar(CP_ACP, 0, szSJIS, strlen(szSJIS) + 1, bufUnicode, BUFSIZE);
+    WideCharToMultiByte(CP_UTF8, 0, bufUnicode, lenUnicode, bufUTF8, size, NULL, NULL);
+    return bufUTF8;
+}
+
+char* convchar(wchar_t* a) {
+
+    size_t origsize = wcslen(a) + 1;
+    size_t convertedChars = 0;
+
+    const size_t newsize = origsize * 2;
+    // The new string will contain a converted copy of the original
+    // string plus the type of string appended to it.
+    char* nstring = new char[newsize];
+
+    // Put a copy of the converted string into nstring
+    wcstombs_s(&convertedChars, nstring, newsize, a, _TRUNCATE);
+    // append the type of string to the new string.
+    //_mbscat_s((unsigned char*)nstring, newsize + strConcatsize, (unsigned char*)strConcat);
+
+    return nstring;
+}
+
 int main(char* fname[], int i) {
 
     // メモリリーク検出
     //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-    char PLfn[] = "C:/Users/Bee/Desktop/LY200605-A BEEだけ.xlsx"; //読み込むファイルの指定 /LY20191127-SHIP BEE だけ.xlsx
-    char Zfn[] = "C:/Users/Bee/Desktop/【1 縦売り 夏】在庫状況.xlsx";
-    char mfile[] = "C:/Users/Bee/Desktop/test[システム].xlsx"; //テスト書き出し
+    char PLfn[] = "C:/Users/Bee/Desktop/LY200620-A  ゾゾ.xlsx"; //読み込むファイルの指定 /LY20191127-SHIP BEE だけ.xlsx
+    char Zfn[] = "C:/Users/Bee/Desktop/【1 縦売り 春・秋・冬】在庫状況.xlsx";
+    char mfile[] = "C:/Users/Bee/Desktop/test[システム]test.xlsx"; //テスト書き出し
     char recd[] = "C:/Users/Bee/Desktop/Centraldata"; //テスト書き出し
     
     char inputStr[] = "2020,ship,5/19着";//shift-jis
-    std::string conv = multi_to_utf8_cppapi(inputStr);//utf8へ
+
+   //ワイド文字列(WCHAR*)をマルチバイト文字列(char*)に変換
+//変換前文字列
+    WCHAR wStrW[] = _T("2020,ship,5/19着");
+    //変換文字列格納バッファ
+
+    wchar_t intxto[] = _T("2020,shiptyt着");
+
+    std::string conv = wide_to_utf8_cppapi(intxto);//utf8へ
     const char* newinput = conv.c_str();
+
+    char* Mnstring = convchar(intxto);
+
+    //変換文字列格納バッファ
+   //char	inMainstr[50];
+    char	wStrC[250];
+    size_t wLen = 0;
+    errno_t err = 0;
+
+    //ロケール指定
+    setlocale(LC_ALL, "japanese");
+
+    //変換
+    err = wcstombs_s(&wLen, wStrC, 250, intxto, _TRUNCATE);
+
+    char* sMstr = (char*)malloc(100);
+    char* inMainstr = (char*)malloc(100);
+
+    sMstr = SJIStoUTF8(wStrC, sMstr, 100);
+    
+    int wlen = 0;
+    while (sMstr[wlen] != '\0') {
+        inMainstr[wlen] = sMstr[wlen];
+        wlen++;
+    }
+    inMainstr[wlen] = '\0';
+    
+    std::cout << "wchar to char : " << inMainstr <<" "<<wLen<< std::endl;
 
     /*-----------------------------
     入力文字チェック
@@ -147,7 +215,13 @@ int main(char* fname[], int i) {
     //入力テキスト文字分ける
     char** splstr = nullptr;
     inputtxt* inptxt = nullptr;
-    inptxt = hr2->slipInputText((char*)newinput, inptxt);//分割テキスト
+    if(strlen(Mnstring)>0)
+        inptxt = hr2->slipInputText((char*)Mnstring, inptxt);//分割テキスト
+    else
+    {
+        inptxt = (inputtxt*)malloc(sizeof(inputtxt));
+        inptxt = nullptr;
+    }
     inputtxt* rootintxt = inptxt;
 
     int txtnum = hr2->intxtCount;//テキスト数
@@ -239,7 +313,7 @@ int main(char* fname[], int i) {
     -----------------------*/
  
     DeflateDecode* Hdeco;
-    char sheet[] = "worksheets/sheet70";
+    char sheet[] = "worksheets/sheet";
     const char sharefn[] = "xl/sharedStrings.xml";
     bool t = false;
     Ctags* mh;//発注到着　cell データ読み込み

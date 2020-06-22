@@ -53,10 +53,11 @@ bool searchItemNum::searchitemNumber(UINT8* uniq,inputtxt* iptxt,int sicounts) {
         sr = sr->next;
     }
     //入力テキスト最後の参照まで進める
-    while (iptxt->next)
-        iptxt = iptxt->next;
-
-
+    if (iptxt) {
+        while (iptxt->next)
+            iptxt = iptxt->next;
+    }
+    
     if (!incellflag)
         return false;//品番一致なし
     else {

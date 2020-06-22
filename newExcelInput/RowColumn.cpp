@@ -1286,6 +1286,12 @@ void Ctags::Ctablefree(C* c) {
 
     while (c) {
         q = c->next;  /* 次へのポインタを保存 */
+        free(c->val);
+        free(c->t);
+        free(c->s);
+        free(c->si);
+        free(c->f);
+
         free(c);
         c = q;
     }
@@ -1297,6 +1303,12 @@ void Ctags::Rowtablefree() {
     while (rows) {
         Ctablefree(rows->cells);
         q = rows->next;  /* 次へのポインタを保存 */
+        free(rows->customFormat);
+        free(rows->s);
+        free(rows->customHeight);
+        free(rows->ht);
+        free(rows->spanE);
+        free(rows->spanS);
         free(rows);
         rows = q;
     }
@@ -1307,6 +1319,9 @@ void Ctags::selectfree() {
 
     while (sct) {
         q = sct->next;  /* 次へのポインタを保存 */
+        free(sct->a);
+        free(sct->p);
+        free(sct->s);
         free(sct);
         sct = q;
     }
@@ -1317,6 +1332,14 @@ void Ctags::colfree() {
 
     while (cls) {
         q = cls->next;  /* 次へのポインタを保存 */
+        free(cls->bestffit);
+        free(cls->min);
+        free(cls->max);
+        free(cls->width);
+        free(cls->style);
+        free(cls->hidden);
+        free(cls->customwidth);
+
         free(cls);
         cls = q;
     }
@@ -1327,6 +1350,12 @@ void Ctags::panefree() {
 
     while (Panes) {
         q = Panes->next;  /* 次へのポインタを保存 */
+        free(Panes->activP);
+        free(Panes->state);
+        free(Panes->tLeftC);
+        free(Panes->ySp);
+        free(Panes->xSp);
+
         free(Panes);
         Panes = q;
     }

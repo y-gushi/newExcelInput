@@ -14,13 +14,33 @@ struct Fonts {
 	Fonts* next;
 };
 
+/*fill内容--------------*/
+
+struct FillPattern
+{
+	UINT8* patternType;
+};
+
+struct fgcolor
+{
+	UINT8* theme;
+	UINT8* tint;
+};
+
+struct bgcolor
+{
+	UINT8* indexed;
+};
+
 struct Fills
 {
-	UINT8* type;
-	UINT8* fg;
-	UINT8* bg;
+	FillPattern* patten;
+	fgcolor* fg;
+	bgcolor* bg;
 	Fills* next;
 };
+/*-----------------------*/
+
 //ボーダー内容
 struct borderstyle
 {
@@ -28,6 +48,8 @@ struct borderstyle
 	UINT8* theme;
 	UINT8* tint;
 	UINT8* rgb;
+	UINT8* index;
+	UINT8* Auto;
 };
 
 struct borders
@@ -69,6 +91,7 @@ struct cellxfs
 	UINT8* applyAlignment;
 	UINT8* Avertical;
 	UINT8* AwrapText;
+	UINT8* horizontal;
 	cellxfs* next;
 };
 
@@ -104,7 +127,7 @@ struct numFMts
 class styleread {
 public:
 	const char fonts[7] = "<fonts";
-	const char Efont[9] = "</fonts>";
+	const char Efonts[9] = "</fonts>";
 	const char fills[7] = "<fills";
 	const char endfil[9] = "</fills>";
 	const char border[9] = "<borders";
@@ -127,18 +150,30 @@ public:
 
 	UINT64 readp;
 
+	Fonts* fontRoot;
+	Fills* fillroot;
+	borders* BorderRoot;
+	stylexf* cellstyleXfsRoot;
+	cellxfs* cellXfsRoot;
+
+	UINT8* fontCount;
+	UINT8* fillCount;
+	UINT8* borderCount;
+	UINT8* cellStyleXfsCount;
+	UINT8* cellXfsCount;
+
 	styleread();
 	~styleread();
 
 	Fonts* addfonts(Fonts* f, UINT8* sz, UINT8* co, UINT8* na, UINT8* fa, UINT8* cha, UINT8* sch);
 
-	Fills* addfill(Fills* fi, UINT8* t, UINT8* f, UINT8* b);
+	Fills* addfill(Fills* fi, FillPattern* p, fgcolor* f, bgcolor* b);
 
 	borders* addborder(borders* b, borderstyle* l, borderstyle* r, borderstyle* t, borderstyle* bo, borderstyle* d);
 
 	stylexf* addstylexf(stylexf* sx, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* ap, UINT8* av);
 
-	cellxfs* addcellxfs(cellxfs* c, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* av, UINT8* at);
+	cellxfs* addcellxfs(cellxfs* c, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* av, UINT8* at, UINT8* ho, UINT8* afo, UINT8* afi, UINT8* xid);
 
 	cellstyle* addcellstyle(cellstyle* c, UINT8* n, UINT8* x, UINT8* b, UINT8* cu, UINT8* xr);
 
@@ -148,7 +183,33 @@ public:
 
 	numFMts* addnumFmts(numFMts* n, UINT8* i, UINT8* c);
 
-	UINT8* readfonts(UINT8* sd, UINT64 len, UINT64 rp);
+	void readfontV(UINT8* dat);
+
+	UINT8* readfonts(UINT8* sd);
+
+	void getfillV(UINT8* d);
+
+	UINT8* readfill(UINT8* sd);
+
+	fgcolor* readfillFg(UINT8* dat);
+
+	bgcolor* readbgcolor(UINT8* dat);
+
+	borderstyle* getborV(UINT8* dat, UINT8* endT, size_t endTlen);
+
+	void getBorder(UINT8* d);
+
+	UINT8* readboerder(UINT8* d);
+
+	UINT8* getValue(UINT8* d);
+
+	void getCellStyleXfsV(UINT8* d);
+
+	void getCellXfsV(UINT8* d);
+
+	void readCellStyleXfs(UINT8* d);
+
+	void readCellXfs(UINT8* d);
 
 	void readstyle(UINT8* sdata,UINT64 sdatalen);
 };
