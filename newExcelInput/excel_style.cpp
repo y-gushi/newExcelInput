@@ -1,6 +1,6 @@
 #include "excel_style.h"
 #include <iostream>
-
+/*
 styleread::styleread()
 {
 	readp = 0;
@@ -42,7 +42,7 @@ styleread::~styleread()
 	free(styleSheetStr);
 	free(extLstStr);
 }
-
+*/
 void styleread::freefonts(Fonts* f) {
 	Fonts* q;
 
@@ -123,7 +123,7 @@ void styleread::freeDxf(Dxf* f) {
 	}
 }
 
-Fonts* styleread::addfonts(Fonts* f, UINT8* sz, UINT8* co, UINT8* na, UINT8* fa, UINT8* cha, UINT8* sch) {
+Fonts* styleread::addfonts(Fonts* f, UINT8* sz, UINT8* co, UINT8* na, UINT8* fa, UINT8* cha, UINT8* sch,UINT8* rg) {
 	if (!f) {
 		f = (Fonts*)malloc(sizeof(Fonts));
 		f->sz = sz;
@@ -132,10 +132,11 @@ Fonts* styleread::addfonts(Fonts* f, UINT8* sz, UINT8* co, UINT8* na, UINT8* fa,
 		f->family = fa;
 		f->charset = cha;
 		f->scheme = sch;
+		f->rgb = rg;
 		f->next = nullptr;
 	}
 	else {
-		f->next = addfonts(f->next, sz, co, na, fa, cha, sch);
+		f->next = addfonts(f->next, sz, co, na, fa, cha, sch,rg);
 	}
 
 	return f;
@@ -173,7 +174,7 @@ borders* styleread::addborder(borders* b, borderstyle* l,borderstyle* r,borderst
 	return b;
 }
 
-stylexf* styleread::addstylexf(stylexf* sx, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* ap, UINT8* av) {
+stylexf* styleread::addstylexf(stylexf* sx, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* ap, UINT8* av, UINT8* af) {
 	if (!sx) {
 		sx = (stylexf*)malloc(sizeof(stylexf));
 		sx->numFmtId = n;
@@ -185,10 +186,11 @@ stylexf* styleread::addstylexf(stylexf* sx, UINT8* n, UINT8* fo, UINT8* fi, UINT
 		sx->applyAlignment = aa;
 		sx->applyProtection = ap;
 		sx->Avertical = av;//alignment vertical
+		sx->applyFont = af;
 		sx->next = nullptr;
 	}
 	else {
-		sx->next = addstylexf(sx->next, n, fo, fi, bi, an, ab, aa, ap, av);
+		sx->next = addstylexf(sx->next, n, fo, fi, bi, an, ab, aa, ap, av,af);
 	}
 
 	return sx;
@@ -277,6 +279,7 @@ numFMts* styleread::addnumFmts(numFMts* n, UINT8* i, UINT8* c) {
 void styleread::readfontV(UINT8* dat) {
 	const char sz[9] = "sz val=\"";//8
 	const char colo[14] = "color theme=\"";//13
+	const char colorgb[12] = "color rgb=\"";//11
 	const char name[11] = "name val=\"";//10
 	const char fami[13] = "family val=\"";//12
 	const char chars[14] = "charset val=\"";//13
@@ -288,6 +291,8 @@ void styleread::readfontV(UINT8* dat) {
 	UINT8 strsear[14] = { 0 };//13文字
 	UINT8 seafam[13] = { 0 };//12文字
 	UINT8 seanam[11] = { 0 };//10文字
+	UINT8 Sz[9] = { 0 };//8文字
+	UINT8 rgb[12] = { 0 };//11文字
 
 	UINT8* SZ = (UINT8*)malloc(1); SZ = nullptr;
 	UINT8* Name = (UINT8*)malloc(1); Name = nullptr;
@@ -295,6 +300,7 @@ void styleread::readfontV(UINT8* dat) {
 	UINT8* Family = (UINT8*)malloc(1); Color = nullptr;
 	UINT8* Charset = (UINT8*)malloc(1); Charset = nullptr;
 	UINT8* Scheme = (UINT8*)malloc(1); Scheme = nullptr;
+	UINT8* RGB = (UINT8*)malloc(1); RGB = nullptr;
 
 	int eresult = 1;
 	int txtresult = 0;
@@ -310,14 +316,18 @@ void styleread::readfontV(UINT8* dat) {
 				seafam[i] = seafam[i + 1];
 			if (i < 10 - 1)
 				seanam[i] = seanam[i + 1];
+			if (i < 8 - 1)
+				Sz[i] = Sz[i + 1];
+			if (i < 11 - 1)
+				rgb[i] = rgb[i + 1];
 		}
-		strsear[12] = endtag[6] = seafam[11] = seanam[9] = dat[readp];
-		strsear[13] = endtag[7] = seafam[12] = seanam[10] = '\0';
+		rgb[10]=Sz[7]=strsear[12] = endtag[6] = seafam[11] = seanam[9] = dat[readp];
+		rgb[11] = Sz[8]=strsear[13] = endtag[7] = seafam[12] = seanam[10] = '\0';
 		readp++;
 
-		txtresult = strncmp((const char*)strsear, sche, 12);//font スタートタグ 検索
+		//txtresult = strncmp((const char*)strsear, sche, 12);//font スタートタグ 検索
 
-		txtresult = strncmp((const char*)strsear, sche, 12);//scheme 検索
+		txtresult = strncmp((const char*)seafam, sche, 12);//scheme 検索
 		if (txtresult == 0) //scheme 読み込み
 			Scheme = getValue(dat);
 
@@ -326,14 +336,24 @@ void styleread::readfontV(UINT8* dat) {
 			Charset = getValue(dat);
 
 		txtresult = strncmp((const char*)seafam, fami, 12);//family検索
-		if (txtresult == 0) //family読み込み
+		if (txtresult == 0) { //family読み込み
+			free(Family);
 			Family = getValue(dat);
+		}
 
 		txtresult = strncmp((const char*)strsear, colo, 13);//color検索
-		if (txtresult == 0) //color読み込み
+		if (txtresult == 0) {//color読み込み
+			free(Color);
 			Color = getValue(dat);
+		}
 
-		txtresult = strncmp((const char*)endtag, sz, 8);//sz検索
+		txtresult = strncmp((const char*)rgb, colorgb, 11);//color検索
+		if (txtresult == 0) {//color読み込み
+			free(RGB);
+			RGB = getValue(dat);
+		}
+
+		txtresult = strncmp((const char*)Sz, sz, 8);//sz検索
 		if (txtresult == 0) //sz読み込み
 			SZ = getValue(dat);
 
@@ -344,7 +364,7 @@ void styleread::readfontV(UINT8* dat) {
 		eresult = strcmp((const char*)endtag, Efont);
 	}
 
-	fontRoot = addfonts(fontRoot, SZ, Color, Name, Family, Charset, Scheme);//フォント　追加
+	fontRoot = addfonts(fontRoot, SZ, Color, Name, Family, Charset, Scheme,RGB);//フォント　追加
 }
 
 UINT8* styleread::readfonts(UINT8* sd) {
@@ -422,9 +442,11 @@ void styleread::getfillV(UINT8* d) {
 		Pattern[13] = fbtag[8]= endtag[7] = '\0';
 		readp++;
 
-		txtresult = strncmp((const char*)Pattern, type, 10);//pattern Type 検索
-		if (txtresult == 0) //pattern Type 読み込み
+		txtresult = strncmp((const char*)Pattern, type, 13);//pattern Type 検索
+		if (txtresult == 0) { //pattern Type 読み込み
+			free(PaT);
 			PaT = getValue(d);
+		}
 
 		txtresult = strncmp((const char*)fbtag, Fgtag, 8);//pattern Type 検索
 		if (txtresult == 0) {//pattern Type 読み込み
@@ -483,13 +505,16 @@ UINT8* styleread::readfill(UINT8* sd) {
 
 fgcolor* styleread::readfillFg(UINT8* dat) {
 	const char theme[] = "theme=\"";//7字
+	const char rgb[] = "rgb=\"";//5字
 	const char fgtag[] = "tint=\"";//6ji
 
 	UINT8 Theme[8] = { 0 };//7文字
 	UINT8 Fgtag[7] = { 0 };//6文字
+	UINT8 Rg[6] = { 0 };//5文字
 
 	UINT8* TH = (UINT8*)malloc(1); TH = nullptr;
 	UINT8* SC = (UINT8*)malloc(1); SC = nullptr;
+	UINT8* RGB = (UINT8*)malloc(1);  RGB = nullptr;
 
 	int vallen = 0;
 	size_t taglen = 0;
@@ -503,14 +528,24 @@ fgcolor* styleread::readfillFg(UINT8* dat) {
 			Theme[i] = Theme[i + 1];
 			if (i < 5)
 				Fgtag[i] = Fgtag[i + 1];
+			if (i < 4)
+				Rg[i] = Rg[i + 1];
 		}
-		Theme[6] = Fgtag[5] = dat[readp];
-		Theme[7] = Fgtag[6] = '\0';
+		Rg[4]=Theme[6] = Fgtag[5] = dat[readp];
+		Rg[5] = Theme[7] = Fgtag[6] = '\0';
 		readp++;
 
 		result = strncmp((const char*)Theme, theme, 7);//theme 検索
-		if (result == 0)
+		if (result == 0) {
+			free(TH);
 			TH = getValue(dat);
+		}
+
+		result = strncmp((const char*)Rg, rgb, 5);//theme 検索
+		if (result == 0) {
+			free(RGB);
+			RGB = getValue(dat);
+		}
 
 		result = strncmp((const char*)Fgtag, fgtag, 7);//fgtag 検索
 		if (result == 0)
@@ -520,6 +555,7 @@ fgcolor* styleread::readfillFg(UINT8* dat) {
 	fgcolor* FG = (fgcolor*)malloc(sizeof(fgcolor));
 	FG->theme = TH;
 	FG->tint = SC;
+	FG->rgb = RGB;
 
 	return FG;
 }
@@ -756,10 +792,10 @@ UINT8* styleread::readboerder(UINT8* d) {
 
 //tag""値取得
 UINT8* styleread::getValue(UINT8* d) {
-	int vallen = 0;
+	size_t vallen = 0;
 	size_t taglen = size_t(readp);
 	size_t msize = 0;
-	UINT8* tagval = (UINT8*)malloc(1);
+	UINT8* tagval;
 	tagval = nullptr;
 
 	while (d[readp] != '"') {
@@ -768,7 +804,7 @@ UINT8* styleread::getValue(UINT8* d) {
 		readp++;
 	}
 	msize = vallen + 1;
-	free(tagval);
+
 	tagval = (UINT8*)malloc(msize);
 	for (size_t i = 0; i < vallen; i++)
 		tagval[i] = d[taglen + i];
@@ -788,6 +824,7 @@ void styleread::getCellStyleXfsV(UINT8* d) {
 	const char applyBorder[] = "applyBorder=\"";//13文字
 	const char applyAlignment[] = "applyAlignment=\"";//16文字
 	const char applyProtection[] = "applyProtection=\"";//17文字
+	const char afon[] = "applyFont=\"";//11文字
 
 	const char endtag[] = "</xf>";//5文字
 
@@ -799,6 +836,7 @@ void styleread::getCellStyleXfsV(UINT8* d) {
 	UINT8 abor[14] = { 0 };//13文字
 	UINT8 aali[17] = { 0 };//16文字
 	UINT8 apro[18] = { 0 };//17文字
+	UINT8 afo[12] = { 0 };//11文字
 
 	UINT8* num = (UINT8*)malloc(1); num= nullptr;
 	UINT8* fon = (UINT8*)malloc(1); fon = nullptr;
@@ -809,6 +847,7 @@ void styleread::getCellStyleXfsV(UINT8* d) {
 	UINT8* Abo = (UINT8*)malloc(1); Abo = nullptr;
 	UINT8* Aal = (UINT8*)malloc(1); Aal = nullptr;
 	UINT8* Apr = (UINT8*)malloc(1); Apr = nullptr;
+	UINT8* Afo = (UINT8*)malloc(1); Afo = nullptr;
 
 	int result = 1;
 	int sresult = 0;
@@ -828,16 +867,24 @@ void styleread::getCellStyleXfsV(UINT8* d) {
 				Fid[i] = Fid[i + 1];
 			if (i < 5 - 1)
 				Et[i] = Et[i + 1];
+			if (i < 11 - 1)
+				afo[i] = afo[i + 1];
 		}
-		apro[16] = aali[15] = abor[12] = borid[9] = Fid[7] = Et[4] = d[readp];
-		apro[17] = aali[16] = abor[13] = borid[10] = Fid[8] = Et[5] = '\0';
+		afo[10]=apro[16] = aali[15] = abor[12] = borid[9] = Fid[7] = Et[4] = d[readp];
+		afo[11] = apro[17] = aali[16] = abor[13] = borid[10] = Fid[8] = Et[5] = '\0';
 		readp++;
 
 		//終了タグ　なし　/>終了
 		if (d[readp - 1] == '/')
 			if (d[readp] == '>')
 				break;
-		sresult = strncmp((const char*)apro, applyProtection, 17);
+		sresult = strncmp((const char*)apro, afon, 11);
+		if (sresult == 0) {
+			//numFmtId　値読み込み
+			free(Afo);
+			Afo = getValue(d);
+		}
+		sresult = strncmp((const char*)afo, applyProtection, 17);
 		if (sresult == 0) {
 			//numFmtId　値読み込み
 			free(Apr);
@@ -894,10 +941,10 @@ void styleread::getCellStyleXfsV(UINT8* d) {
 		result = strncmp((const char*)Et, endtag, 5);
 	}
 
-	cellstyleXfsRoot = addstylexf(cellstyleXfsRoot, num, fon, fil, bor, Anu, Abo, Aal, Apr, verti);
+	cellstyleXfsRoot = addstylexf(cellstyleXfsRoot, num, fon, fil, bor, Anu, Abo, Aal, Apr, verti,Afo);
 }
 
-//CellStyleXfs読み込み
+//CellXfs読み込み
 void styleread::getCellXfsV(UINT8* d) {
 	const char numFmtId[] = "numFmtId=\"";//10文字
 	const char fontId[] = "fontId=\"";//8文字
@@ -946,6 +993,7 @@ void styleread::getCellXfsV(UINT8* d) {
 	int result = 1;
 	int sresult = 0;
 
+
 	while (result != 0) {
 		for (int i = 0; i < 19 - 1; i++) {
 			anum[i] = anum[i + 1];
@@ -968,8 +1016,8 @@ void styleread::getCellXfsV(UINT8* d) {
 			if (i < 5 - 1)
 				Et[i] = Et[i + 1];
 		}
-		xfid[5]=aF[10]=hori[11]= apro [16]=aali[15]=abor[12]=borid[9] = Fid[7] = Et[4] = d[readp];
-		xfid[6]=aF[11]=hori[12] = apro[17] = aali[16] = abor[13]=borid[10] = Fid[8] = Et[5] = '\0';
+		anum[18]=xfid[5]=aF[10]=hori[11]= apro [16]=aali[15]=abor[12]=borid[9] = Fid[7] = Et[4] = d[readp];
+		anum[19]=xfid[6]=aF[11]=hori[12] = apro[17] = aali[16] = abor[13]=borid[10] = Fid[8] = Et[5] = '\0';
 		readp++;
 
 		//終了タグ　なし　/>終了
@@ -1058,6 +1106,7 @@ void styleread::getCellXfsV(UINT8* d) {
 	}
 
 	cellXfsRoot = addcellxfs(cellXfsRoot, num, fon, fil, bor, Anu, Abo, Aal, verti,Wt,Ho,aFo,aFi,xId);
+
 }
 
 //cellStyleXfs 読み取り
@@ -1081,7 +1130,7 @@ void styleread::readCellStyleXfs(UINT8* d) {
 		readp++;
 
 		sresult = strncmp((const char*)stag, starttag, 3);
-		if (result == 0) {
+		if (sresult == 0) {
 			//スタートタグ　値読み込み
 			getCellStyleXfsV(d);
 		}
@@ -1111,9 +1160,9 @@ void styleread::readCellXfs(UINT8* d) {
 		readp++;
 
 		sresult = strncmp((const char*)stag, starttag, 3);
-		if (result == 0) {
+		if (sresult == 0) {
 			//スタートタグ　値読み込み
-			getCellStyleXfsV(d);
+			getCellXfsV(d);
 		}
 
 		result = strncmp((const char*)endtag, Ecellsty, 13);
@@ -1125,8 +1174,8 @@ void styleread::getnumFmts(UINT8* dat) {
 	const char numFmtId[] = "numFmtId=\"";//10文字
 	const char formatCode[] = "formatCode=\"";//12文字
 
-	UINT8 stag[11] = { 0 };//7文字
-	UINT8 code[13] = { 0 };//10文字
+	UINT8 stag[11] = { 0 };//10文字
+	UINT8 code[13] = { 0 };//12文字
 
 	int result = 0;
 	int eresu = 0;
@@ -1626,6 +1675,7 @@ void styleread::readstyle(UINT8* sdata, UINT64 sdatalen)
 				if (result == 0)
 					numFmtsCount = getValue(sdata);//count 取得
 			}
+			readnumFmt(sdata);
 		}
 
 		otherresult = strncmp((const char*)sfon, fonts, 6);
@@ -1771,6 +1821,7 @@ void styleread::readstyle(UINT8* sdata, UINT64 sdatalen)
 		otherresult = strncmp((const char*)sbor, extLst, 8);
 		if (otherresult == 0) {
 			//extLst 一致
+			readextLst(sdata);
 		}
 
 		result = strncmp(Endstyle, (const char*)sEs,13);

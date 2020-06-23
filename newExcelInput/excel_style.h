@@ -10,6 +10,7 @@ struct Fonts {
 	UINT8* family;
 	UINT8* charset;
 	UINT8* scheme;
+	UINT8* rgb;
 	Fonts* next;
 };
 
@@ -24,6 +25,7 @@ struct fgcolor
 {
 	UINT8* theme;
 	UINT8* tint;
+	UINT8* rgb;
 };
 
 struct bgcolor
@@ -69,6 +71,7 @@ struct stylexf
 	UINT8* fillId;
 	UINT8* borderId;
 	UINT8* applyNumberFormat;
+	UINT8* applyFont;
 	UINT8* applyBorder;
 	UINT8* applyAlignment;
 	UINT8* applyProtection;
@@ -186,8 +189,8 @@ public:
 	UINT8* styleSheetStr;
 	UINT8* extLstStr;
 
-	styleread();
-	~styleread();
+	//styleread();
+	//~styleread();
 
 	void freefonts(Fonts* f);
 
@@ -205,13 +208,13 @@ public:
 
 	void freeDxf(Dxf* f);
 
-	Fonts* addfonts(Fonts* f, UINT8* sz, UINT8* co, UINT8* na, UINT8* fa, UINT8* cha, UINT8* sch);
+	Fonts* addfonts(Fonts* f, UINT8* sz, UINT8* co, UINT8* na, UINT8* fa, UINT8* cha, UINT8* sch, UINT8* rg);
 
 	Fills* addfill(Fills* fi, FillPattern* p, fgcolor* f, bgcolor* b);
 
 	borders* addborder(borders* b, borderstyle* l, borderstyle* r, borderstyle* t, borderstyle* bo, borderstyle* d);
 
-	stylexf* addstylexf(stylexf* sx, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* ap, UINT8* av);
+	stylexf* addstylexf(stylexf* sx, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* ap, UINT8* av, UINT8* af);
 
 	cellxfs* addcellxfs(cellxfs* c, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* av, UINT8* at, UINT8* ho, UINT8* afo, UINT8* afi, UINT8* xid);
 
