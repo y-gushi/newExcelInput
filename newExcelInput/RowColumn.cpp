@@ -61,6 +61,8 @@ C* Ctags::addCtable(C* c, UINT8* tv, UINT8* sv, UINT8* si, UINT32 col, UINT8* v,
 
 Ctags::Ctags(UINT8* decorddata, UINT64 datalen, shareRandD* shdata)
 {
+    MC = (UINT8*)malloc(1);
+    MC = nullptr;
     data = decorddata;
     dlen = datalen;
     sh = shdata;

@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 struct Fonts {
 	UINT8* sz;
 	UINT8* color;
@@ -105,9 +104,22 @@ struct cellstyle
 	cellstyle* next;
 };
 
+struct dxfFont
+{
+	UINT8* b;
+	UINT8* ival;
+	UINT8* theme;
+	UINT8* rgb;
+};
+
+struct dxfFill
+{
+	UINT8* rgb;
+};
+
 struct Dxf {
-	UINT8* color;
-	UINT8* bgcolor;
+	dxfFont* fon;
+	dxfFill* fil;
 	Dxf* next;
 };
 
@@ -146,6 +158,9 @@ public:
 	const char Fmts[9] = "<numFmts";
 	const char Efmts[11] = "</numFmts>";
 
+	const char styleSheet[12] = "<styleSheet";
+	const char extLst[9] = "<extLst>";
+
 	int fontcou;
 
 	UINT64 readp;
@@ -155,15 +170,40 @@ public:
 	borders* BorderRoot;
 	stylexf* cellstyleXfsRoot;
 	cellxfs* cellXfsRoot;
+	numFMts* numFmtsRoot;
+	cellstyle* cellStyleRoot;
+	Dxf* dxfRoot;
 
 	UINT8* fontCount;
 	UINT8* fillCount;
 	UINT8* borderCount;
 	UINT8* cellStyleXfsCount;
 	UINT8* cellXfsCount;
+	UINT8* numFmtsCount;
+	UINT8* cellstyleCount;
+	UINT8* dxfsCount;
+
+	UINT8* styleSheetStr;
+	UINT8* extLstStr;
 
 	styleread();
 	~styleread();
+
+	void freefonts(Fonts* f);
+
+	void freefill(Fills* f);
+
+	void freeborder(borders* f);
+
+	void freestylexf(stylexf* f);
+
+	void freecellxfs(cellxfs* f);
+
+	void freenumFMts(numFMts* f);
+
+	void freecellstyle(cellstyle* f);
+
+	void freeDxf(Dxf* f);
 
 	Fonts* addfonts(Fonts* f, UINT8* sz, UINT8* co, UINT8* na, UINT8* fa, UINT8* cha, UINT8* sch);
 
@@ -177,7 +217,7 @@ public:
 
 	cellstyle* addcellstyle(cellstyle* c, UINT8* n, UINT8* x, UINT8* b, UINT8* cu, UINT8* xr);
 
-	Dxf* adddxf(Dxf* d, UINT8* c, UINT8* bc);
+	Dxf* adddxf(Dxf* d, dxfFont* Fo, dxfFill* Fi);
 
 	colors* addcolor(colors* c, UINT8* co);
 
@@ -210,6 +250,28 @@ public:
 	void readCellStyleXfs(UINT8* d);
 
 	void readCellXfs(UINT8* d);
+
+	void getnumFmts(UINT8* dat);
+
+	void readnumFmt(UINT8* d);
+
+	void getcellStyle(UINT8* d);
+
+	void readcellStyles(UINT8* d);
+
+	dxfFont* readdxffont(UINT8* d);
+
+	dxfFill* readdxffill(UINT8* d);
+
+	void getdxfs(UINT8* d);
+
+	void readdxfs(UINT8* d);
+
+	colors* getcolor(UINT8* d);
+
+	void readcolors(UINT8* d);
+
+	void readextLst(UINT8* d);
 
 	void readstyle(UINT8* sdata,UINT64 sdatalen);
 };

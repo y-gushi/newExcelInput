@@ -65,7 +65,7 @@ public:
     UINT8* headXML = nullptr;// <sheetPrまでの文字
     UINT8* dimtopane = nullptr;// dimension />から<pane 閉じタグまでの文字
     UINT8* sFPr = nullptr;//sheetFormatPrの取得
-    UINT8* MC = nullptr;//マージセル数
+    UINT8* MC;//マージセル数
 
     UINT8* data;//デコードデータ 解放　デコードで
     UINT8* wd;//データ更新用

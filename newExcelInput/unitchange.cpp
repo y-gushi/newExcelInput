@@ -141,6 +141,8 @@ UINT8* unitC::changenumber(UINT8* c)
 		}
 		after[j] = '\0';
 	}
+
+	free(c);
 	
 	return after;
 }

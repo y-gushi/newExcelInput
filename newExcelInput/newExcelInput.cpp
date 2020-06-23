@@ -18,6 +18,8 @@
 #include "atlstr.h"
 #include "comutil.h"
 
+#include "excel_style.h"
+
 #include <locale.h>
 
 //#include <crtdbg.h>//メモリリーク用
@@ -307,6 +309,33 @@ int main(char* fname[], int i) {
     
     delete decShare;//シェアー解凍データ削除
     delete shenc;//share圧縮データ削除
+
+     /*-----------------------
+    スタイルシート読み込み
+    -----------------------*/
+    hr2=new HeaderRead(Zfn);
+    hr2->endread(&Zr);//終端コードの読み込み
+
+    DeflateDecode* Sdeco=new DeflateDecode(&Zr);
+
+    char stylefn[] = "xl/styles.xml";
+
+    while (hr2->filenum < hr2->ER->centralsum) {
+        cddata = hr2->centeroneread(hr2->readpos, hr2->ER->size, hr2->ER->centralnum, stylefn, &Zr);
+        if (cddata)
+            break;
+    }
+    if (cddata) {//ファイル名が合えばローカルヘッダー読み込み
+        hr2->localread(cddata->localheader, &Zr);//sharesstringsの読み込み
+        Sdeco->dataread(hr2->LH->pos, cddata->nonsize);
+    }
+
+    styleread* sr = new styleread();
+    
+    sr->readstyle(Sdeco->ReadV, Sdeco->readlen);
+
+    delete Sdeco;
+    delete sr;
   
      /*-----------------------
     発注到着シート読み込み
@@ -315,6 +344,7 @@ int main(char* fname[], int i) {
     DeflateDecode* Hdeco;
     char sheet[] = "worksheets/sheet";
     const char sharefn[] = "xl/sharedStrings.xml";
+
     bool t = false;
     Ctags* mh;//発注到着　cell データ読み込み
     searchItemNum* sI=nullptr;//品番検索　＆　書き込み
@@ -329,8 +359,6 @@ int main(char* fname[], int i) {
     matchs = nullptr;
     MatchColrs* matchsroot = nullptr;
 
-    //テスト用
-    //const char *tesstr[3] = { "22249","22249","22249" };
 
     while (hr2->filenum < hr2->ER->centralsum) {
         //ファイル名 sheet 部分一致検索
@@ -347,7 +375,6 @@ int main(char* fname[], int i) {
 
             sI = new searchItemNum(sg->its, mh);
 
-            //std::cout << "sharray.uniqstr : " << sharray.uniqstr << std::endl;
             t = sI->searchitemNumber(sharray->uniqstr, inptxt,txtnum);//品番検索　＆　セルデータ追加　シェアー消去（入れる場合は引数に）
 
             if (t)
@@ -395,6 +422,7 @@ int main(char* fname[], int i) {
                 cddata->localheader = LHposstock;//ローカルヘッダー相対位置のみ変更
                 hw.centralwrite(cdf, *cddata);
             }
+            delete sI;
             delete Hdeco;//デコードデータ　削除
             delete mh;
         }
