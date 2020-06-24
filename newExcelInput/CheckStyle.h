@@ -10,7 +10,15 @@ public:
 
 	int searchfonts(Fonts* fs);
 
+	int searchcellstylexfs(stylexf* fs);
+
 	int searchfills(Fills* fs);
+
+	bool searchborderstyle(borderstyle* f, borderstyle* fs);
+
+	int searchborders(borders* fs);
+
+	UINT8* searchnumFmts(numFMts* fs);
 
 	int strcompare(UINT8* sl, UINT8* sr);
 
@@ -75,6 +83,60 @@ inline int checkstyle::searchfonts(Fonts* fs)
 
 	if (!flag)
 		count = -1;
+
+	return count;
+}
+
+inline int checkstyle::searchcellstylexfs(stylexf* fs)
+{
+	stylexf* f = cellstyleXfsRoot;
+	int result = 0;
+	int count = 0;
+	bool flag = false;
+
+	//std::cout << "fs sz : " << fs->sz << std::endl;
+	while (f) {
+		result = strcompare(f->applyAlignment, fs->applyAlignment);
+		if (result == 0) {
+			result = strcompare(f->applyBorder, fs->applyBorder);
+			if (result == 0) {
+				result = strcompare(f->applyFont, fs->applyFont);
+				if (result == 0) {
+					result = strcompare(f->applyNumberFormat, fs->applyNumberFormat);
+					if (result == 0) {
+						result = strcompare(f->applyProtection, fs->applyProtection);
+						if (result == 0) {
+							result = strcompare(f->Avertical, fs->Avertical);
+							if (result == 0) {
+								result = strcompare(f->borderId, fs->borderId);
+								if (result == 0) {
+									result = strcompare(f->fillId, fs->fillId);
+									if (result == 0) {
+										result = strcompare(f->fontId, fs->fontId);
+										if (result == 0) {
+											result = strcompare(f->numFmtId, fs->numFmtId);
+											if (result == 0) {
+												flag = true;
+												break;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		f = f->next;
+		count++;
+	}
+
+	if (!flag)
+		count = -1;
+	else
+		std::cout << "match cellstylexfms : " << count << std::endl;
 
 	return count;
 }
@@ -154,6 +216,108 @@ inline int checkstyle::searchfills(Fills* fs)
 	return count;
 }
 
+inline bool checkstyle::searchborderstyle(borderstyle* f,borderstyle* fs) {
+	bool flag = false;
+	int result = 0;
+
+	if (f && fs) {
+		result = strcompare(f->rgb, fs->rgb);
+		if (result == 0) {
+			result = strcompare(f->Auto, fs->Auto);
+			if (result == 0) {
+				result = strcompare(f->index, fs->index);
+				if (result == 0) {
+					result = strcompare(f->style, fs->style);
+					if (result == 0) {
+						result = strcompare(f->theme, fs->theme);
+						if (result == 0) {
+							result = strcompare(f->tint, fs->tint);
+							if (result == 0) {
+								flag = true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	else if (!f && !fs) {
+		flag = true;
+	}
+
+	return flag;
+}
+
+inline int checkstyle::searchborders(borders* fs)
+{
+	borders* f = BorderRoot;
+	int result = 0;
+	int count = 0;
+	bool lflag = false;
+
+	bool rflag = false;
+	bool bflag = false;
+	bool tflag = false;
+	bool dflag = false;
+
+	while (f) {
+
+		lflag = searchborderstyle(f->left, fs->left);
+		
+		rflag = searchborderstyle(f->right, fs->right);
+
+		bflag = searchborderstyle(f->bottom, fs->bottom);
+
+		tflag = searchborderstyle(f->top, fs->top);
+
+		dflag = searchborderstyle(f->diagonal, fs->diagonal);
+
+		if (lflag && rflag && bflag && tflag && dflag)
+			break;
+
+		f = f->next;
+		count++;
+	}
+
+	if (!lflag || !rflag || !tflag || !bflag ||!dflag) {
+		count = -1;
+		std::cout << "not match border : " << count << std::endl;
+	}
+	else
+		std::cout << "match border : " << count << std::endl;
+
+	return count;
+}
+
+inline UINT8* checkstyle::searchnumFmts(numFMts* fs)
+{
+	numFMts* f = numFmtsRoot;
+	int result = 0;
+	int count = 0;
+	bool flag = false;
+
+	//std::cout << "fs sz : " << fs->sz << std::endl;
+	while (f) {
+		result = strcompare(f->Code, fs->Code);
+		if (result == 0) {
+			flag = true;
+			break;
+		}
+
+		f = f->next;
+		count++;
+	}
+
+	if (!flag) {
+		UINT8* nu = (UINT8*)malloc(1); nu = nullptr;
+		return nu;
+	}
+	else
+		std::cout << "match numFmts : " << count << std::endl;
+
+	return f->Id;
+}
+
 inline int checkstyle::strcompare(UINT8* sl, UINT8* sr)
 {
 	int result = 1;
@@ -172,6 +336,8 @@ inline void checkstyle::configstyle(UINT8* num)
 	Fills* fi = (Fills*)malloc(sizeof(Fills));
 	cellxfs* cx = (cellxfs*)malloc(sizeof(cellxfs));
 	stylexf* csx = (stylexf*)malloc(sizeof(stylexf));
+	numFMts* nf = (numFMts*)malloc(sizeof(numFMts));
+	borders* bd = (borders*)malloc(sizeof(borders));
 
 	UINT8* nullbox = (UINT8*)malloc(1); nullbox = nullptr;
 
@@ -268,11 +434,65 @@ inline void checkstyle::configstyle(UINT8* num)
 			//フィル設定追加　必要
 		}
 
-		//xfIdの設定
-		//applyBorder applyAlignment
+		//numFmid 検索
+		//numFmtId //code
+		const char benumFmCode[] = "[$$-409]#,##0.00;[$$-409]#,##0.00"; //id 177(template)
+		nf->Code = (UINT8*)malloc(34);
+		memcpy(nf->Code, (UINT8*)benumFmCode, 34);
+
+		nf->Id = (UINT8*)malloc(1); nf->Id = nullptr;
+
+		csx->numFmtId = searchnumFmts(nf);
+		if (csx->numFmtId) {
+			std::cout << "match numfmts : " << csx->numFmtId << std::endl;
+			free(nf->Code); free(nf->Id); free(nf);
+		}
+		else {
+			//numFmts 設定 0にする
+			UINT8 ze[] = "0";
+			free(csx->numFmtId);
+			csx->numFmtId = (UINT8*)malloc(2);
+			memcpy(csx->numFmtId, ze, 2);
+		}
+
+		//ボーダーID検索
+		//設定 なし
+		bd->left = (borderstyle*)malloc(sizeof(borderstyle)); bd->left = nullptr;
+		bd->right = (borderstyle*)malloc(sizeof(borderstyle)); bd->right = nullptr;
+		bd->top = (borderstyle*)malloc(sizeof(borderstyle)); bd->top = nullptr;
+		bd->bottom = (borderstyle*)malloc(sizeof(borderstyle)); bd->bottom = nullptr;
+		bd->diagonal = (borderstyle*)malloc(sizeof(borderstyle)); bd->diagonal = nullptr;
+
+		fontnumb = searchborders(bd);
+		if (fontnumb != -1)
+		{
+			cx->borderId = strchange.InttoChar(fontnumb, &place);//一致番号入力
+			csx->borderId = strchange.InttoChar(fontnumb, &place);
+			free(bd->left); free(bd->right); free(bd->top); free(bd->bottom); free(bd->diagonal); free(bd);
+		}
+		else {
+			cx->borderId = (UINT8*)malloc(1); cx->fillId = nullptr;//cellxfs font null
+			csx->borderId = (UINT8*)malloc(1); csx->fillId = nullptr;
+			//ボーダー設定追加　必要
+		}
+
+		//xfIdの設定 cellstyle xfs
+		//applyBorder applyAlignment vertical
 		const char* bexfids[] = { "0","0","center" };
-		cx->applyAlignment = (UINT8*)malloc(2);
-		memcpy(cx->applyAlignment, (UINT8*)bexfids[1], 2);
+		csx->applyAlignment = (UINT8*)malloc(2);
+		memcpy(csx->applyAlignment, (UINT8*)bexfids[1], 2);
+
+		csx->applyBorder = (UINT8*)malloc(2);
+		memcpy(csx->applyAlignment, (UINT8*)bexfids[0], 2);
+
+		csx->Avertical = (UINT8*)malloc(7);
+		memcpy(csx->Avertical, (UINT8*)bexfids[2], 7);
+
+		csx->applyNumberFormat = (UINT8*)malloc(1); csx->applyNumberFormat = nullptr;
+
+		csx->applyProtection = (UINT8*)malloc(1); csx->applyProtection = nullptr;
+
+		fontnumb = searchcellstylexfs(csx);
 
 		free(cx->fontId); free(csx->fontId);
 		free(cx->fillId); free(csx->fillId);
@@ -285,9 +505,7 @@ inline void checkstyle::configstyle(UINT8* num)
 
 	//border all null
 
-	//numFmtId
-	//code
-	const char benumFmCode[] = "[$$-409]#,##0.00;[$$-409]#,##0.00"; //id 177(template)
+	
 
 	//xfId
 	
