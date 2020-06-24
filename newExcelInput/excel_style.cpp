@@ -1,6 +1,6 @@
 #include "excel_style.h"
 #include <iostream>
-/*
+
 styleread::styleread()
 {
 	readp = 0;
@@ -42,7 +42,7 @@ styleread::~styleread()
 	free(styleSheetStr);
 	free(extLstStr);
 }
-*/
+
 void styleread::freefonts(Fonts* f) {
 	Fonts* q;
 
@@ -547,7 +547,7 @@ fgcolor* styleread::readfillFg(UINT8* dat) {
 			RGB = getValue(dat);
 		}
 
-		result = strncmp((const char*)Fgtag, fgtag, 7);//fgtag ŒŸõ
+		result = strncmp((const char*)Fgtag, fgtag, 6);//fgtag ŒŸõ
 		if (result == 0)
 			SC = getValue(dat);
 	}
@@ -573,7 +573,7 @@ bgcolor* styleread::readbgcolor(UINT8* dat) {
 	size_t msize = 0;
 
 	int result = 0;
-	//fgColor “Ç‚Ýž‚Ý
+	//bgColor “Ç‚Ýž‚Ý
 	while (dat[readp] != '>') {
 
 		for (int i = 0; i < 8; i++) {
@@ -583,7 +583,7 @@ bgcolor* styleread::readbgcolor(UINT8* dat) {
 		Index[9] = '\0';
 		readp++;
 
-		result = strncmp((const char*)Index, indexed, 7);//indexed ŒŸõ
+		result = strncmp((const char*)Index, indexed, 9);//indexed ŒŸõ
 		if (result == 0)
 			ID = getValue(dat);//Index ’lŽæ“¾
 	}

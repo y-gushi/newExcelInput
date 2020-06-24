@@ -1,73 +1,184 @@
-#pragma once
+Ôªø#pragma once
 
 #include "excel_style.h"
+
+
 
 class StyleWrite:public styleread
 {
 public:
 
-	StyleWrite(FILE* f);
+	StyleWrite();
 	~StyleWrite();
 
 	FILE* fr;
 
-	void stylewrite();
-	void writedata(UINT8* stag, UINT8* v, UINT8* etag);
+	void cellXfswrite();
+	void fontswrite();
+	void fillwrite();
+	void borderwrite();
+	void cellstyleXfs();
+	void numFmidwrite();
 
-	void checkstyle(UINT8* num);
+	void writedata(UINT8* stag, UINT8* v, UINT8* etag);
 
 private:
 	
 };
 
-StyleWrite::StyleWrite(FILE* f)
+StyleWrite::StyleWrite()
 {
-	//**fonts = { "11", "FF006100","ÇlÇr ÇoÉSÉVÉbÉN", "2","128","minor" };
 	
-	fr = f;
-
-	readp = 0;
-	fontcou = 0;
-
-	fontCount = nullptr;
-	fillCount = nullptr;
-	borderCount = nullptr;
-	cellStyleXfsCount = nullptr;
-	cellXfsCount = nullptr;
-	numFmtsCount = nullptr;
-	cellstyleCount = nullptr;
-	dxfsCount = nullptr;
-
-	fontRoot = nullptr;
-	fillroot = nullptr;
-	BorderRoot = nullptr;
-	cellstyleXfsRoot = nullptr;
-	cellXfsRoot = nullptr;
-	numFmtsRoot = nullptr;
-	cellStyleRoot = nullptr;
-	dxfRoot = nullptr;
-
-	styleSheetStr = nullptr;
-	extLstStr = nullptr;
 }
 
 StyleWrite::~StyleWrite()
 {
-	freefonts(fontRoot);
-	freefill(fillroot);
-	freeborder(BorderRoot);
-	freestylexf(cellstyleXfsRoot);
-	freecellxfs(cellXfsRoot);
-	freenumFMts(numFmtsRoot);
-	freecellstyle(cellStyleRoot);
-	freeDxf(dxfRoot);
-
-	free(styleSheetStr);
-	free(extLstStr);
 }
 
-inline void StyleWrite::stylewrite()
+//write cellXfs
+inline void StyleWrite::cellXfswrite()
 {
+	while (cellXfsCount) {
+		cellXfsRoot = cellXfsRoot->next;
+	}
+
+	if (cellXfsRoot->numFmtId) {
+		std::cout << "numFmtId : " <<cellXfsRoot->numFmtId << std::endl;
+	}
+	if (cellXfsRoot->fontId) {
+		std::cout << "fontId : " <<cellXfsRoot->fontId << std::endl;
+	}
+	if (cellXfsRoot->fillId)
+		std::cout << "fillId : " <<cellXfsRoot->fillId << std::endl;
+	if (cellXfsRoot->borderId)
+		std::cout << "borderId : " <<cellXfsRoot->borderId << std::endl;
+	if (cellXfsRoot->xfId)
+		std::cout << "xfId : " <<cellXfsRoot->xfId << std::endl;
+	if (cellXfsRoot->applyNumberFormat)
+		std::cout << "applyNumberFormat : " <<cellXfsRoot->applyNumberFormat << std::endl;
+	if (cellXfsRoot->applyFont)
+		std::cout << "applyFont : " <<cellXfsRoot->applyFont << std::endl;
+	if (cellXfsRoot->applyFill)
+		std::cout << "applyFill : " <<cellXfsRoot->applyFill << std::endl;
+	if (cellXfsRoot->applyBorder)
+		std::cout << "applyBorder : " <<cellXfsRoot->applyBorder << std::endl;
+	if (cellXfsRoot->applyAlignment)
+		std::cout << "applyAlignment : " <<cellXfsRoot->applyAlignment << std::endl;
+	if (cellXfsRoot->Avertical)
+		std::cout << "vertical : " <<cellXfsRoot->Avertical << std::endl;
+	if (cellXfsRoot->horizontal)
+		std::cout << "horizontal : " <<cellXfsRoot->horizontal << std::endl;
+	if (cellXfsRoot->AwrapText)
+		std::cout << "wrapText : " <<cellXfsRoot->AwrapText << std::endl;
+}
+
+inline void StyleWrite::fontswrite()
+{
+	while (fontRoot)
+	{
+		fontRoot = fontRoot->next;
+	}
+	if (fontRoot->sz)
+		std::cout << "sz : " << fontRoot->sz << std::endl;
+	if (fontRoot->color)
+		std::cout << "theme : " << fontRoot->color << std::endl;
+	if (fontRoot->rgb)
+		std::cout << "rgb : " << fontRoot->rgb << std::endl;
+	if (fontRoot->name)
+		std::cout << "name : " << fontRoot->name << std::endl;
+	if (fontRoot->family)
+		std::cout << "family : " << fontRoot->family << std::endl;
+	if (fontRoot->charset)
+		std::cout << "charset : " << fontRoot->charset << std::endl;
+	if (fontRoot->scheme)
+		std::cout << "scheme : " << fontRoot->scheme << std::endl;
+	if (fontRoot->rgb)
+		std::cout << "rgb : " << fontRoot->rgb << std::endl;
+}
+
+inline void StyleWrite::fillwrite()
+{
+	while (fillroot)
+	{
+		fillroot = fillroot->next;
+	}
+	if (fillroot->patten)
+		std::cout << "patternType : " << fillroot->patten->patternType << std::endl;
+	if (fillroot->fg) {
+		if (fillroot->fg->rgb)
+			std::cout << "fgColor rgb : " << fillroot->fg->rgb << std::endl;
+		if (fillroot->fg->theme)
+			std::cout << "fgColor theme : " << fillroot->fg->theme << std::endl;
+		if (fillroot->fg->tint)
+			std::cout << "fgColor tint : " << fillroot->fg->tint << std::endl;
+	}
+	if (fillroot->bg) {
+		if (fillroot->bg->indexed)
+			std::cout << "bgColor indexed : " << fillroot->bg->indexed << std::endl;
+	}
+}
+
+inline void StyleWrite::borderwrite()
+{
+	while (BorderRoot)
+	{
+		BorderRoot = BorderRoot->next;
+	}
+	if (BorderRoot->left)
+		std::cout << "left style : " << BorderRoot->left->style << std::endl;
+	else
+		std::cout << "left ‰Ωï„ÇÇ„Å™„Åó " << std::endl;
+	if (BorderRoot->right)
+		std::cout << "right style : " << BorderRoot->right->style << std::endl;
+	else
+		std::cout << "right ‰Ωï„ÇÇ„Å™„Åó " << std::endl;
+	if (BorderRoot->bottom)
+		std::cout << "bottom style : " << BorderRoot->top->style << std::endl;
+	else
+		std::cout << "bottom ‰Ωï„ÇÇ„Å™„Åó " << std::endl;
+	if (BorderRoot->top)
+		std::cout << "top style : " << BorderRoot->top->style << std::endl;
+	else
+		std::cout << "top ‰Ωï„ÇÇ„Å™„Åó " << std::endl;
+}
+
+inline void StyleWrite::cellstyleXfs()
+{
+	while (cellstyleXfsRoot)
+	{
+		cellstyleXfsRoot = cellstyleXfsRoot->next;
+	}
+	if (cellstyleXfsRoot->numFmtId)
+		std::cout << "numFmtId : " << cellstyleXfsRoot->numFmtId << std::endl;
+	if (cellstyleXfsRoot->fontId)
+		std::cout << "fontId : " << cellstyleXfsRoot->fontId << std::endl;
+	if (cellstyleXfsRoot->fillId)
+		std::cout << "fillId : " << cellstyleXfsRoot->fillId << std::endl;
+	if (cellstyleXfsRoot->borderId)
+		std::cout << "borderId : " << cellstyleXfsRoot->borderId << std::endl;
+	if (cellstyleXfsRoot->applyNumberFormat)
+		std::cout << "applyNumberFormat : " << cellstyleXfsRoot->applyNumberFormat << std::endl;
+	if (cellstyleXfsRoot->applyFont)
+		std::cout << "applyFont : " << cellstyleXfsRoot->applyFont << std::endl;
+	if (cellstyleXfsRoot->applyBorder)
+		std::cout << "applyBorder : " << cellstyleXfsRoot->applyBorder << std::endl;
+	if (cellstyleXfsRoot->applyAlignment)
+		std::cout << "applyAlignment : " << cellstyleXfsRoot->applyAlignment << std::endl;
+	if (cellstyleXfsRoot->applyProtection)
+		std::cout << "applyProtection : " << cellstyleXfsRoot->applyProtection << std::endl;
+	if (cellstyleXfsRoot->Avertical)
+		std::cout << "vertical : " << cellstyleXfsRoot->Avertical << std::endl;
+}
+
+inline void StyleWrite::numFmidwrite()
+{
+	while (numFmtsRoot) {
+		numFmtsRoot = numFmtsRoot->next;
+	}
+	if (numFmtsRoot->Id)
+		std::cout << "numFmtId : " << numFmtsRoot->Id << std::endl;
+	if (numFmtsRoot->Code)
+		std::cout << "code : " << numFmtsRoot->Code << std::endl;
 }
 
 inline void StyleWrite::writedata(UINT8* stag, UINT8* v, UINT8* etag)
@@ -90,50 +201,4 @@ inline void StyleWrite::writedata(UINT8* stag, UINT8* v, UINT8* etag)
 	}
 }
 
-inline void StyleWrite::checkstyle(UINT8* num)
-{
-	/*-----------------------------------
-	bee styleê›íË
-	-----------------------------------*/
-	//font sz rgb name family charset scheme
-	const char* fonts[] = { "11", "FF006100","ÇlÇr ÇoÉSÉVÉbÉN", "2","128","minor" };
-	//patternType fgrgb
-	const char* fill[] = { "solid","FFC6EFCE" };
-	//border all null
-	//numFmtId
-	//code
-	const char numFmCode[] = "[$$-409]#,##0.00;[$$-409]#,##0.00";
 
-	//xfId
-	//applyBorder applyAlignment
-	const char* xfids[] = { "0","0","center" };
-
-	/*-----------------------------------
-	shoplist styleê›íË
-	-----------------------------------*/
-	//font sz theme name family charset scheme
-	const char* fonts[] = { "11", "0","ÇlÇr ÇoÉSÉVÉbÉN", "2","128","minor" };
-	//patternType fgtheme
-	const char* fill[] = { "solid","4" };
-	//border all null
-	//numFmtId
-	//code
-	const char numFmId[] = "0";
-
-	//xfId
-	//applyBorder applyAlignment
-	const char* xfids[] = { "0","0","center" };
-
-
-	ArrayNumber* changeStr = new ArrayNumber;
-
-	UINT32 stylenum = changeStr->RowArraytoNum(num, strlen((const char*)num));//style î‘çÜÅ@êîéöÇ…ïœä∑
-
-	int stylec = 0;
-	cellxfs* cxf = cellXfsRoot;
-
-	while (stylec < stylenum && cxf) {
-		cxf = cxf->next;
-		stylec++;
-	}
-}

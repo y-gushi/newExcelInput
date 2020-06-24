@@ -2,6 +2,7 @@
 #include "typechange.h"
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
 
 struct Fonts {
 	UINT8* sz;
@@ -189,8 +190,8 @@ public:
 	UINT8* styleSheetStr;
 	UINT8* extLstStr;
 
-	//styleread();
-	//~styleread();
+	styleread();
+	~styleread();
 
 	void freefonts(Fonts* f);
 

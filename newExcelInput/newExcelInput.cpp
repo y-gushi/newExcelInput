@@ -22,6 +22,8 @@
 
 #include <locale.h>
 
+#include "CheckStyle.h"
+
 //#include <crtdbg.h>//メモリリーク用
 #define BUFSIZE  256
 
@@ -109,7 +111,7 @@ int main(char* fname[], int i) {
 
     FILE* f=nullptr;
 
-    StyleWrite* sr = new StyleWrite(f);
+    checkstyle* sr = new checkstyle(f);
     
     sr->readstyle(Sdeco->ReadV, Sdeco->readlen);
 
@@ -149,16 +151,16 @@ int main(char* fname[], int i) {
             int stylec = 0;
 
             //177 bee
-            //24 shoplist
-            //26 zozo
+            //23 shoplist
+            //26 zozo 25
             //28 smarby
             //30 magaseek
-            while (stylec < 24 && sr->cellXfsRoot) {
+            while (stylec < 177 && sr->cellXfsRoot) {
                 sr->cellXfsRoot = sr->cellXfsRoot->next;
                 stylec++;
             }
             ArrayNumber* changeStr = new ArrayNumber;
-            std::cout << "style 24 " << std::endl;
+            std::cout << "style 177 " << std::endl;
 
             if (sr->cellXfsRoot->numFmtId)
                 std::cout << "numFmtId : " << sr->cellXfsRoot->numFmtId << std::endl;
@@ -177,6 +179,10 @@ int main(char* fname[], int i) {
                 std::cout << "applyFont : " << sr->cellXfsRoot->applyFont << std::endl;
             if (sr->cellXfsRoot->applyFill)
                 std::cout << "applyFill : " << sr->cellXfsRoot->applyFill << std::endl;
+            if (sr->cellXfsRoot->applyBorder)
+                std::cout << "applyBorder : " << sr->cellXfsRoot->applyBorder << std::endl;
+            if (sr->cellXfsRoot->applyAlignment)
+                std::cout << "applyAlignment : " << sr->cellXfsRoot->applyAlignment << std::endl;
             if (sr->cellXfsRoot->Avertical)
                 std::cout << "vertical : " << sr->cellXfsRoot->Avertical << std::endl;
             if (sr->cellXfsRoot->horizontal)
@@ -192,49 +198,60 @@ int main(char* fname[], int i) {
             UINT32 fontnum = changeStr->RowArraytoNum(sr->cellXfsRoot->fontId, place);
 
             stylec = 0;
+            Fonts* srf = sr->fontRoot;
             while (stylec < fontnum) {
-                sr->fontRoot = sr->fontRoot->next;
+                srf = srf->next;
                 stylec++;
             }
             std::cout << std::endl;
             std::cout << "フォント検索 " << fontnum << std::endl;
             std::cout << std::endl;
-            if (sr->fontRoot->sz)
-                std::cout << "sz : " << sr->fontRoot->sz << std::endl;
-            if (sr->fontRoot->color)
-                std::cout << "theme : " << sr->fontRoot->color << std::endl;
-            if (sr->fontRoot->rgb)
-                std::cout << "rgb : " << sr->fontRoot->rgb << std::endl;
-            if (sr->fontRoot->name)
-                std::cout << "name : " << sr->fontRoot->name << std::endl;
-            if (sr->fontRoot->family)
-                std::cout << "family : " << sr->fontRoot->family << std::endl;
-            if (sr->fontRoot->charset)
-                std::cout << "charset : " << sr->fontRoot->charset << std::endl;
-            if (sr->fontRoot->scheme)
-                std::cout << "scheme : " << sr->fontRoot->scheme << std::endl;
+            if (srf->sz)
+                std::cout << "sz : " << srf->sz << std::endl;
+            if (srf->color)
+                std::cout << "theme : " << srf->color << std::endl;
+            if (srf->rgb)
+                std::cout << "rgb : " << srf->rgb << std::endl;
+            if (srf->name)
+                std::cout << "name : " << srf->name << std::endl;
+            if (srf->family)
+                std::cout << "family : " << srf->family << std::endl;
+            if (srf->charset)
+                std::cout << "charset : " << srf->charset << std::endl;
+            if (srf->scheme)
+                std::cout << "scheme : " << srf->scheme << std::endl;
+            if (srf->rgb)
+                std::cout << "rgb : " << srf->rgb << std::endl;
 
             //fillid 検索
             place = 0;
+            Fills* fils = sr->fillroot;
+
             while (sr->cellXfsRoot->fillId[place] != '\0')
                 place++;
             fontnum = changeStr->RowArraytoNum(sr->cellXfsRoot->fillId, place);
             stylec = 0;
             while (stylec < fontnum) {
-                sr->fillroot = sr->fillroot->next;
+                fils = fils->next;
                 stylec++;
             }
             std::cout << std::endl;
             std::cout << "fill検索 " << fontnum << std::endl;
             std::cout << std::endl;
-            if (sr->fillroot->patten)
-                std::cout << "patternType : " << sr->fillroot->patten->patternType << std::endl;
-            if (sr->fillroot->fg){
-                if (sr->fillroot->fg->rgb)
-                    std::cout << "fgColor rgb : " << sr->fillroot->fg->rgb << std::endl;
-                if (sr->fillroot->fg->theme)
-                    std::cout << "fgColor theme : " << sr->fillroot->fg->theme << std::endl;
-        }
+            if (fils->patten)
+                std::cout << "patternType : " << fils->patten->patternType << std::endl;
+            if (fils->fg) {
+                if (fils->fg->rgb)
+                    std::cout << "fgColor rgb : " << fils->fg->rgb << std::endl;
+                if (fils->fg->theme)
+                    std::cout << "fgColor theme : " << fils->fg->theme << std::endl;
+                if (fils->fg->tint)
+                    std::cout << "fgColor tint : " << fils->fg->tint << std::endl;
+            }
+            if (fils->bg) {
+                if(fils->bg->indexed)
+                    std::cout << "bgColor indexed : " << fils->bg->indexed << std::endl;
+            }
 
             //ボーダー 検索
             place = 0;
@@ -243,7 +260,7 @@ int main(char* fname[], int i) {
             fontnum = changeStr->RowArraytoNum(sr->cellXfsRoot->borderId, place);
             stylec = 0;
             while (stylec < fontnum) {
-                sr->fillroot = sr->fillroot->next;
+                sr->BorderRoot = sr->BorderRoot->next;
                 stylec++;
             }
             std::cout << std::endl;
@@ -287,6 +304,8 @@ int main(char* fname[], int i) {
                 std::cout << "fillId : " << sr->cellstyleXfsRoot->fillId << std::endl;
             if (sr->cellstyleXfsRoot->borderId)
                 std::cout << "borderId : " << sr->cellstyleXfsRoot->borderId << std::endl;
+            if (sr->cellstyleXfsRoot->applyNumberFormat)
+                std::cout << "applyNumberFormat : " << sr->cellstyleXfsRoot->applyNumberFormat << std::endl;
             if (sr->cellstyleXfsRoot->applyFont)
                 std::cout << "applyFont : " << sr->cellstyleXfsRoot->applyFont << std::endl;
             if (sr->cellstyleXfsRoot->applyBorder)
@@ -316,6 +335,10 @@ int main(char* fname[], int i) {
                 std::cout << "numFmtId : " << sr->numFmtsRoot->Id << std::endl;
             if (sr->numFmtsRoot->Code)
                 std::cout << "code : " << sr->numFmtsRoot->Code << std::endl;
+
+            
+            UINT8 be[] = "bee";
+            sr->configstyle(be);
             
             delete Hdeco;//デコードデータ　削除
             delete mh;

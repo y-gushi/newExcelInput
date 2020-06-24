@@ -164,6 +164,7 @@
   <ItemGroup>
     <ClInclude Include="bitInOut.h" />
     <ClInclude Include="ChangeArrayNumber.h" />
+    <ClInclude Include="CheckStyle.h" />
     <ClInclude Include="StyleWrite.h" />
     <ClInclude Include="compressdata.h" />
     <ClInclude Include="CRC.h" />
