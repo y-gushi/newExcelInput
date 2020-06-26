@@ -109,6 +109,11 @@ inline void StyleWrite::fillwrite()
 	UINT8 et[] = "/>";
 	UINT8 e[] = ">";
 
+	UINT8 sz[] = "<sz";
+	UINT8 col[] = "<color";
+	UINT8 na[] = "<name";
+	UINT8 fa[] = "<family";
+
 	oneStrwrite((UINT8*)fonts);
 	oneStrplusDoubleq(cou, fontCount);
 	if (kFonts)
