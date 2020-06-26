@@ -179,6 +179,7 @@ public:
 	Dxf* dxfRoot;
 
 	UINT8* fontCount;
+	UINT8* kFonts;
 	UINT8* fillCount;
 	UINT8* borderCount;
 	UINT8* cellStyleXfsCount;

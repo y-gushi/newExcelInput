@@ -20,6 +20,10 @@ public:
 	void cellstyleXfs();
 	void numFmidwrite();
 
+	void oneStrplusDoubleq(UINT8* str, UINT8* v);
+
+	void oneStrwrite(UINT8* str);
+
 	void writedata(UINT8* stag, UINT8* v, UINT8* etag);
 
 private:
@@ -72,10 +76,12 @@ inline void StyleWrite::cellXfswrite()
 		std::cout << "wrapText : " <<cellXfsRoot->AwrapText << std::endl;
 }
 
+//フォント書き込み
 inline void StyleWrite::fontswrite()
 {
 	while (fontRoot)
 	{
+
 		fontRoot = fontRoot->next;
 	}
 	if (fontRoot->sz)
@@ -98,10 +104,23 @@ inline void StyleWrite::fontswrite()
 
 inline void StyleWrite::fillwrite()
 {
+	UINT8 cou[] = " count=\"";
+	UINT8 kf[] = " x14ac:knownFonts=\"";
+	UINT8 et[] = "/>";
+	UINT8 e[] = ">";
+
+	oneStrwrite((UINT8*)fonts);
+	oneStrplusDoubleq(cou, fontCount);
+	if (kFonts)
+		oneStrplusDoubleq(kf, kFonts);
+	oneStrwrite(e);
+
 	while (fillroot)
 	{
+		
 		fillroot = fillroot->next;
 	}
+
 	if (fillroot->patten)
 		std::cout << "patternType : " << fillroot->patten->patternType << std::endl;
 	if (fillroot->fg) {
@@ -170,15 +189,60 @@ inline void StyleWrite::cellstyleXfs()
 		std::cout << "vertical : " << cellstyleXfsRoot->Avertical << std::endl;
 }
 
+//numFmt 書き込み
 inline void StyleWrite::numFmidwrite()
 {
+	UINT8 st[] = "<numFmt";
+	UINT8 id[]=" numFmtId=\"";
+	UINT8 code[] = " formatCode=\"";
+	UINT8 cou[] = " count=\"";
+	UINT8 et[] = "/>";
+	UINT8 e[] = ">";
+
+	oneStrwrite((UINT8*)Fmts);
+	oneStrplusDoubleq(cou, numFmtsCount);
+	oneStrwrite((UINT8*)e);
+
 	while (numFmtsRoot) {
+		oneStrwrite(st);
+		if (numFmtsRoot->Id)
+			oneStrplusDoubleq(id, numFmtsRoot->Id);
+		if (numFmtsRoot->Code)
+			oneStrplusDoubleq(code, numFmtsRoot->Code);
+		oneStrwrite(et);
+
 		numFmtsRoot = numFmtsRoot->next;
 	}
-	if (numFmtsRoot->Id)
-		std::cout << "numFmtId : " << numFmtsRoot->Id << std::endl;
-	if (numFmtsRoot->Code)
-		std::cout << "code : " << numFmtsRoot->Code << std::endl;
+
+	oneStrwrite((UINT8*)Efmts);
+}
+
+//xx="~" 書き込み
+inline void StyleWrite::oneStrplusDoubleq(UINT8* str,UINT8* v) {
+	int i = 0;
+	char d = '"';
+
+	while (str[i] != '\0') {
+		fwrite(&str[i], 1, 1, fr);
+		i++;
+	}
+	i = 0;
+	while (v[i] != '\0') {
+		fwrite(&v[i], 1, 1, fr);
+		i++;
+	}
+
+	fwrite(&d, 1, 1, fr);
+}
+
+//tag書き込み
+inline void StyleWrite::oneStrwrite(UINT8* str) {
+	int i = 0;
+
+	while (str[i] != '\0') {
+		fwrite(&str[i], 1, 1, fr);
+		i++;
+	}
 }
 
 inline void StyleWrite::writedata(UINT8* stag, UINT8* v, UINT8* etag)

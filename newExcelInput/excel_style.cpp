@@ -26,6 +26,7 @@ styleread::styleread()
 
 	styleSheetStr = nullptr;
 	extLstStr = nullptr;
+	kFonts = nullptr;
 }
 
 styleread::~styleread()
@@ -1607,6 +1608,8 @@ void styleread::readextLst(UINT8* d) {
 void styleread::readstyle(UINT8* sdata, UINT64 sdatalen)
 {
 	const char count[] = "count=\"";//count検索
+	const char knownFonts[] = "x14ac:knownFonts=\"";//18
+	kFonts = (UINT8*)malloc(1); kFonts = nullptr;
 
 	UINT8 sEs[14] = { 0 };//13文字
 	UINT8 sExfs[16] = { 0 };//15文字
@@ -1616,9 +1619,11 @@ void styleread::readstyle(UINT8* sdata, UINT64 sdatalen)
 	UINT8 sstyle[12] = { 0 };//11文字
 
 	UINT8 Cou[8] = { 0 };
+	UINT8 knoF[19] = { 0 };
 
 	int result = 1;
 	int otherresult = 0;
+	int exresult = 0;
 
 	int vallen = 0;
 	int taglen = 0;
@@ -1685,16 +1690,23 @@ void styleread::readstyle(UINT8* sdata, UINT64 sdatalen)
 			std::cout << "read fonts" << sfon << std::endl;
 			//フォント一致 read font
 			while (sdata[readp] != '>') {
-				for (int i = 0; i < 7 - 1; i++) {
-					Cou[i] = Cou[i + 1];
+				for (int i = 0; i < 18 - 1; i++) {
+					knoF[i] = knoF[i + 1];
+					if(i<7-1)
+						Cou[i] = Cou[i + 1];
 				}
-				Cou[6] = sdata[readp];
-				Cou[7] = '\0';
+				knoF[18-1]=Cou[6] = sdata[readp];
+				knoF[18]=Cou[7] = '\0';
 				readp++;
 
+				exresult= strncmp((const char*)knoF, knownFonts, 18);
 				result = strncmp((const char*)Cou, count, 7);
 				if (result == 0)
 					fontCount = getValue(sdata);//count 取得
+				if (exresult) {
+					free(kFonts);
+					kFonts = getValue(sdata);
+				}
 			}
 			readfonts(sdata);//フォントタグ取得
 		}
