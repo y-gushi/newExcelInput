@@ -12,11 +12,17 @@ public:
 
 	int searchcellstylexfs(stylexf* fs);
 
+	int searchcellxfs(cellxfs* fs);
+
+	int searchcellstyle(cellstyle* fs);
+
 	int searchfills(Fills* fs);
 
 	bool searchborderstyle(borderstyle* f, borderstyle* fs);
 
 	int searchborders(borders* fs);
+
+	void CountincIiment(UINT8* cstr);
 
 	UINT8* searchnumFmts(numFMts* fs);
 
@@ -33,6 +39,7 @@ private:
 	char sm[7] = "smarby";
 	char sh[9] = "shoplist";
 	char be[4] = "bee";
+	char ms[9] = "magaseek";
 };
 
 checkstyle::checkstyle(FILE* f)
@@ -51,7 +58,7 @@ inline int checkstyle::searchfonts(Fonts* fs)
 	int count = 0;
 	bool flag = false;
 
-	std::cout << "fs sz : " << fs->sz << std::endl;
+	//std::cout << "fs theme : " << fs->color << std::endl;
 	while (f) {
 		result = strcompare(f->sz, fs->sz);
 		if (result == 0) {
@@ -83,6 +90,8 @@ inline int checkstyle::searchfonts(Fonts* fs)
 
 	if (!flag)
 		count = -1;
+	else
+		std::cout << "match font : " << count << std::endl;
 
 	return count;
 }
@@ -94,7 +103,7 @@ inline int checkstyle::searchcellstylexfs(stylexf* fs)
 	int count = 0;
 	bool flag = false;
 
-	//std::cout << "fs sz : " << fs->sz << std::endl;
+	//std::cout << "fs aA : " << fs->fillId << " " << f->fillId << std::endl;
 	while (f) {
 		result = strcompare(f->applyAlignment, fs->applyAlignment);
 		if (result == 0) {
@@ -137,6 +146,99 @@ inline int checkstyle::searchcellstylexfs(stylexf* fs)
 		count = -1;
 	else
 		std::cout << "match cellstylexfms : " << count << std::endl;
+
+	return count;
+}
+
+inline int checkstyle::searchcellxfs(cellxfs* fs)
+{
+	cellxfs* f = cellXfsRoot;
+	int result = 0;
+	int count = 0;
+	bool flag = false;
+
+	//std::cout << "fs aA : " << fs->fontId << " " << f->fontId << std::endl;
+	while (f) {
+		result = strcompare(f->applyAlignment, fs->applyAlignment);
+		if (result == 0) {
+			result = strcompare(f->applyBorder, fs->applyBorder);
+			if (result == 0) {
+				result = strcompare(f->applyFont, fs->applyFont);
+				if (result == 0) {
+					result = strcompare(f->applyNumberFormat, fs->applyNumberFormat);
+					if (result == 0) {
+						result = strcompare(f->applyFill, fs->applyFill);
+						if (result == 0) {
+							result = strcompare(f->Avertical, fs->Avertical);
+							if (result == 0) {
+								result = strcompare(f->borderId, fs->borderId);
+								if (result == 0) {
+									result = strcompare(f->fillId, fs->fillId);
+									if (result == 0) {
+										result = strcompare(f->fontId, fs->fontId);
+										if (result == 0) {
+											result = strcompare(f->numFmtId, fs->numFmtId);
+											if (result == 0) {
+												result = strcompare(f->AwrapText, fs->AwrapText);
+												if (result == 0) {
+													result = strcompare(f->xfId, fs->xfId);
+													if (result == 0) {
+														result = strcompare(f->horizontal, fs->horizontal);
+														if (result == 0) {
+															flag = true;
+															break;
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		f = f->next;
+		count++;
+	}
+
+	if (!flag)
+		count = -1;
+	else
+		std::cout << "match cellxfms : " << count << std::endl;
+
+	return count;
+}
+//cellstyle 検索　xfid戻り
+inline int checkstyle::searchcellstyle(cellstyle* fs)
+{
+	cellstyle* f = cellStyleRoot;
+	int result = 0;
+	int count = 0;
+	bool flag = false;
+
+	//std::cout << "fs name : " << fs->name << " " << f->name << std::endl;
+	while (f) {
+		if(f->name)
+		result = strcompare(f->xfId, fs->xfId);
+		if (result == 0) {
+			flag = true;
+			break;
+		}
+
+		f = f->next;
+		count++;
+	}
+
+	if (!flag) {
+		count = -1;
+	}
+	else {
+		std::cout << "match xfid : " << f->xfId << std::endl;
+	}
 
 	return count;
 }
@@ -289,12 +391,30 @@ inline int checkstyle::searchborders(borders* fs)
 	return count;
 }
 
+inline void checkstyle::CountincIiment(UINT8* cstr)
+{
+	int l = 0;
+	UINT32 count = 0;
+	while (cstr[l] != '\0')
+		l++;
+
+	std::cout << "count ;" << cstr << std::endl;
+
+	count=strchange.RowArraytoNum(cstr, l);
+	count++;
+
+	cstr = strchange.InttoChar(count, &l);
+
+	std::cout << "count plus ;" << cstr << std::endl;
+}
+
 inline UINT8* checkstyle::searchnumFmts(numFMts* fs)
 {
 	numFMts* f = numFmtsRoot;
 	int result = 0;
 	int count = 0;
 	bool flag = false;
+	UINT8* nu = nullptr;
 
 	//std::cout << "fs sz : " << fs->sz << std::endl;
 	while (f) {
@@ -309,13 +429,17 @@ inline UINT8* checkstyle::searchnumFmts(numFMts* fs)
 	}
 
 	if (!flag) {
-		UINT8* nu = (UINT8*)malloc(1); nu = nullptr;
+		nu = (UINT8*)malloc(1); nu = nullptr;
 		return nu;
 	}
 	else
 		std::cout << "match numFmts : " << count << std::endl;
 
-	return f->Id;
+	size_t leng = strlen((const char*)f->Id) + 1;
+	nu = (UINT8*)malloc(leng);
+	memcpy(nu, f->Id, leng);
+
+	return nu;
 }
 
 inline int checkstyle::strcompare(UINT8* sl, UINT8* sr)
@@ -326,6 +450,8 @@ inline int checkstyle::strcompare(UINT8* sl, UINT8* sr)
 		result = strcmp((const char*)sl, (const char*)sr);
 	else if (!sl && !sr)
 		result = 0;
+	else
+		result = 1;
 
 	return result;
 }
@@ -338,111 +464,118 @@ inline void checkstyle::configstyle(UINT8* num)
 	stylexf* csx = (stylexf*)malloc(sizeof(stylexf));
 	numFMts* nf = (numFMts*)malloc(sizeof(numFMts));
 	borders* bd = (borders*)malloc(sizeof(borders));
+	cellstyle* cs = nullptr;
 
 	UINT8* nullbox = (UINT8*)malloc(1); nullbox = nullptr;
+
+	UINT8* style = nullptr;//s 決定
 
 	int fontnumb = 0;//検索番号
 	int place = 0;//検索番号　桁数
 
+	/************共通設定　cellXFs**************/
+	//applyNumberFormat applyAlignment vertical wraptext numFmId
+	const char* bewraptext[] = { "1","1","center","1","0" };
+
+	//ID検索以外の値入れる
+	cx->applyNumberFormat = (UINT8*)malloc(2);
+	memcpy(cx->applyNumberFormat, (UINT8*)bewraptext[0], 2);
+	cx->applyAlignment = (UINT8*)malloc(2); 
+	memcpy(cx->applyAlignment, (UINT8*)bewraptext[1], 2);
+	cx->Avertical = (UINT8*)malloc(7);
+	memcpy(cx->Avertical, (UINT8*)bewraptext[2], 7);
+	cx->AwrapText = (UINT8*)malloc(2);
+	memcpy(cx->AwrapText, (UINT8*)bewraptext[3], 2);
+	cx->numFmtId = (UINT8*)malloc(2);
+	memcpy(cx->numFmtId, (UINT8*)bewraptext[4], 2);
+	cx->applyBorder = (UINT8*)malloc(1); cx->applyBorder = nullptr;
+	cx->horizontal = (UINT8*)malloc(1); cx->horizontal = nullptr;
+	cx->applyFill = (UINT8*)malloc(1); cx->applyFill = nullptr;
+	cx->applyFont = (UINT8*)malloc(1); cx->applyFont = nullptr;
+
+	/************共通設定　フォント**************/
+	const char fname[] = "ＭＳ Ｐゴシック";
+	char foname[255] = { 0 };
+	char* fon = nullptr;
+	fon = SJIStoUTF8((char*)fname, foname, 255);//フォントname UTF-8に変換
+
+	const char* sharefonts[] = { "11", "2","128","minor" };//sz family charset scheme
+	fo->sz = (UINT8*)malloc(3);
+	memcpy(fo->sz, (UINT8*)sharefonts[0], 3);
+	fo->name = (UINT8*)malloc(strlen(fon) + 1);
+	memcpy(fo->name, (UINT8*)fon, strlen(fon) + 1);
+	fo->family = (UINT8*)malloc(2);
+	memcpy(fo->family, (UINT8*)sharefonts[1], 2);
+	fo->charset = (UINT8*)malloc(4);
+	memcpy(fo->charset, (UINT8*)sharefonts[2], 4);
+	fo->scheme = (UINT8*)malloc(6);
+	memcpy(fo->scheme, (UINT8*)sharefonts[3], 6);
+
+	/************共通設定　フィル**************/
+	//patternType fgrgb
+	const char patternFill[] = "solid";
+
+	fi->patten = (FillPattern*)malloc(sizeof(FillPattern));
+	fi->patten->patternType = (UINT8*)malloc(6);
+	memcpy(fi->patten->patternType, (UINT8*)patternFill, 6);
+
+	/************ 共通設定　ボーダー **************/
+	bd->left = (borderstyle*)malloc(sizeof(borderstyle)); bd->left = nullptr;
+	bd->right = (borderstyle*)malloc(sizeof(borderstyle)); bd->right = nullptr;
+	bd->top = (borderstyle*)malloc(sizeof(borderstyle)); bd->top = nullptr;
+	bd->bottom = (borderstyle*)malloc(sizeof(borderstyle)); bd->bottom = nullptr;
+	bd->diagonal = (borderstyle*)malloc(sizeof(borderstyle)); bd->diagonal = nullptr;
+
+	/************共通設定　cellstyleXFs**************/
+
+	const char* bexfids[] = { "0","0","center" };
+	csx->applyAlignment = (UINT8*)malloc(2);
+	memcpy(csx->applyAlignment, (UINT8*)bexfids[1], 2);
+	csx->applyBorder = (UINT8*)malloc(2);
+	memcpy(csx->applyBorder, (UINT8*)bexfids[0], 2);
+	csx->Avertical = (UINT8*)malloc(7);
+	memcpy(csx->Avertical, (UINT8*)bexfids[2], 7);
+
+	csx->applyNumberFormat = (UINT8*)malloc(1); csx->applyNumberFormat = nullptr;
+	csx->applyFont = (UINT8*)malloc(1); csx->applyFont = nullptr;
+	csx->applyProtection = (UINT8*)malloc(1); csx->applyProtection = nullptr;
+
 	//入力文字　ショップ別
 	int resultshop = 0;
 	resultshop = strcmp((const char*)num, be);
-
+	/*-----------------------------------
+	bee style設定
+	-----------------------------------*/
 	if (resultshop == 0) {
-		//shop split bee
-		//applyNumberFormat applyAlignment vertical wraptext
-		const char* bewraptext[] = { "1","1","center","1" };
-
-		cx->applyNumberFormat = (UINT8*)malloc(2);
-		memcpy(cx->applyNumberFormat, (UINT8*)bewraptext[0], 2);
-
-		cx->applyAlignment = (UINT8*)bewraptext[1];
-		cx->Avertical = (UINT8*)bewraptext[2];
-		cx->AwrapText = (UINT8*)bewraptext[3];
-
-		//他検索後入力
-
-		//fonts 設定
+		//bee
+				//fonts 設定
+		//------------- ショップ別 フォント色 -----------------//
 		//font sz rgb name family charset scheme
-		const char* befonts[] = { "11", "FF006100","ＭＳ Ｐゴシック", "2","128","minor" };
-		char foname[255] = { 0 };
-		char* fon = nullptr;
-		fon = SJIStoUTF8((char*)befonts[2], foname, 255);//UTF-8に変換
-
-		fo->sz = (UINT8*)malloc(3);
-		memcpy(fo->sz, (UINT8*)befonts[0], 3);
-
+		const char befonts[] = "FF006100";
 		fo->rgb = (UINT8*)malloc(9);
-		memcpy(fo->rgb, (UINT8*)befonts[1], 9);
-
-		fo->name = (UINT8*)fon;// (UINT8*)befonts[2];
-
-		fo->family = (UINT8*)malloc(2);
-		memcpy(fo->family, (UINT8*)befonts[3], 2);
-
-		fo->charset = (UINT8*)malloc(4);
-		memcpy(fo->charset, (UINT8*)befonts[4], 4);
-
-		fo->scheme = (UINT8*)malloc(6);
-		memcpy(fo->scheme, (UINT8*)befonts[5], 6);
-
-		fo->color = (UINT8*)malloc(1);
-		fo->color = nullptr;
-
-		fontnumb = searchfonts(fo);
-		if (fontnumb != -1)
-		{
-			cx->fontId = strchange.InttoChar(fontnumb, &place);//一致番号入力
-			csx->fontId = strchange.InttoChar(fontnumb, &place);
-			free(fo->sz); free(fo->rgb); free(fo->family); free(fo->charset); free(fo->scheme); free(fo->color); free(fo);
-		}
-		else {
-			cx->fontId = (UINT8*)malloc(1); cx->fontId=nullptr;//cellxfs font null
-			csx->fontId = (UINT8*)malloc(1); csx->fontId = nullptr;
-			//フォント設定追加　必要
-		}
+		memcpy(fo->rgb, (UINT8*)befonts, 9);
+		fo->color = (UINT8*)malloc(1);fo->color = nullptr;
 		
 		//fill 設定
-		//patternType fgrgb
-		const char* befill[] = { "solid","FFC6EFCE" };//他null
-		fi->patten = (FillPattern*)malloc(sizeof(FillPattern));
-
-		fi->patten->patternType = (UINT8*)malloc(6);
-		memcpy(fi->patten->patternType, (UINT8*)befill[0], 6);
-
+		//------------- ショップ別 フォント色 -----------------//
+		const char befill[] = "FFC6EFCE";//他null
 		fi->fg = (fgcolor*)malloc(sizeof(fgcolor));
-
 		fi->fg->rgb = (UINT8*)malloc(9);
-		memcpy(fi->fg->rgb, (UINT8*)befill[1], 9);
-
+		memcpy(fi->fg->rgb, (UINT8*)befill, 9);
 		fi->fg->theme = (UINT8*)malloc(1); fi->fg->theme = nullptr;
 		fi->fg->tint = (UINT8*)malloc(1); fi->fg->tint = nullptr;
 		fi->bg = (bgcolor*)malloc(sizeof(bgcolor));//なければストラクトをヌルに
 		fi->bg = nullptr;
 
-		fontnumb = searchfills(fi);
-		if (fontnumb != -1)
-		{
-			cx->fillId = strchange.InttoChar(fontnumb, &place);//一致番号入力
-			csx->fillId = strchange.InttoChar(fontnumb, &place);
-			free(fi->patten->patternType); free(fi->fg->rgb); free(fi->fg->theme); free(fi->fg->tint); free(fi->bg); free(fi->fg);
-			free(fi->patten); free(fi);
-		}
-		else {
-			cx->fillId = (UINT8*)malloc(1); cx->fillId = nullptr;//cellxfs font null
-			csx->fillId = (UINT8*)malloc(1); csx->fillId = nullptr;
-			//フィル設定追加　必要
-		}
-
 		//numFmid 検索
 		//numFmtId //code
-		const char benumFmCode[] = "[$$-409]#,##0.00;[$$-409]#,##0.00"; //id 177(template)
+		const char benumFmCode[] = "[$$-409]#,##0.00;[$$-409]#,##0.00"; //id 177(template) beeだけ
 		nf->Code = (UINT8*)malloc(34);
 		memcpy(nf->Code, (UINT8*)benumFmCode, 34);
 
 		nf->Id = (UINT8*)malloc(1); nf->Id = nullptr;
 
-		csx->numFmtId = searchnumFmts(nf);
+		csx->numFmtId = searchnumFmts(nf);//numFmt 加える
 		if (csx->numFmtId) {
 			std::cout << "match numfmts : " << csx->numFmtId << std::endl;
 			free(nf->Code); free(nf->Id); free(nf);
@@ -453,149 +586,254 @@ inline void checkstyle::configstyle(UINT8* num)
 			free(csx->numFmtId);
 			csx->numFmtId = (UINT8*)malloc(2);
 			memcpy(csx->numFmtId, ze, 2);
-		}
-
-		//ボーダーID検索
-		//設定 なし
-		bd->left = (borderstyle*)malloc(sizeof(borderstyle)); bd->left = nullptr;
-		bd->right = (borderstyle*)malloc(sizeof(borderstyle)); bd->right = nullptr;
-		bd->top = (borderstyle*)malloc(sizeof(borderstyle)); bd->top = nullptr;
-		bd->bottom = (borderstyle*)malloc(sizeof(borderstyle)); bd->bottom = nullptr;
-		bd->diagonal = (borderstyle*)malloc(sizeof(borderstyle)); bd->diagonal = nullptr;
-
-		fontnumb = searchborders(bd);
-		if (fontnumb != -1)
-		{
-			cx->borderId = strchange.InttoChar(fontnumb, &place);//一致番号入力
-			csx->borderId = strchange.InttoChar(fontnumb, &place);
-			free(bd->left); free(bd->right); free(bd->top); free(bd->bottom); free(bd->diagonal); free(bd);
-		}
-		else {
-			cx->borderId = (UINT8*)malloc(1); cx->fillId = nullptr;//cellxfs font null
-			csx->borderId = (UINT8*)malloc(1); csx->fillId = nullptr;
-			//ボーダー設定追加　必要
-		}
-
-		//xfIdの設定 cellstyle xfs
-		//applyBorder applyAlignment vertical
-		const char* bexfids[] = { "0","0","center" };
-		csx->applyAlignment = (UINT8*)malloc(2);
-		memcpy(csx->applyAlignment, (UINT8*)bexfids[1], 2);
-
-		csx->applyBorder = (UINT8*)malloc(2);
-		memcpy(csx->applyAlignment, (UINT8*)bexfids[0], 2);
-
-		csx->Avertical = (UINT8*)malloc(7);
-		memcpy(csx->Avertical, (UINT8*)bexfids[2], 7);
-
-		csx->applyNumberFormat = (UINT8*)malloc(1); csx->applyNumberFormat = nullptr;
-
-		csx->applyProtection = (UINT8*)malloc(1); csx->applyProtection = nullptr;
-
-		fontnumb = searchcellstylexfs(csx);
-
-		free(cx->fontId); free(csx->fontId);
-		free(cx->fillId); free(csx->fillId);
+		}		
 	}
-
-
-	/*-----------------------------------
-	bee style設定
-	-----------------------------------*/
-
-	//border all null
-
 	
-
-	//xfId
-	
-
 	//23
 	/*-----------------------------------
-	shoplist style設定
+	shoplist style設定 他　fillが違うだけ
 	-----------------------------------*/
-	//applyNumberFormat vertical horizontal wraptext
-	const char* shwraptext[] = { "1","center","left","1" };
-	//font sz theme name family charset scheme
-	const char* shfonts[] = { "11", "0","ＭＳ Ｐゴシック", "2","128","minor" };
-	//patternType fgtheme
-	const char* shfill[] = { "solid","4" };//他 null
+	resultshop = strcmp((const char*)num, sh);
+	if (resultshop==0) {
+		std::cout << "shoplist" << std::endl;
+		//applyNumberFormat vertical horizontal wraptext
+	//const char* shwraptext[] = { "1","center","left","1" };
+	//------------- ショップ別 cellXFs -----------------//
+	//shoplist
+		const char sholhorizen[] = "left";//vartival
+		//vertical変更
+		free(cx->horizontal);
+		cx->horizontal = (UINT8*)malloc(5);//color theme
+		memcpy(cx->horizontal, (UINT8*)sholhorizen, 5);
 
-										   //border all null
+		//------------- ショップ別 フォント色 -----------------//
+		//shoplist
+		const char sholtheme[] = "0";//theme
+		fo->color = (UINT8*)malloc(2);//color theme
+		memcpy(fo->color, (UINT8*)sholtheme, 2);
+		fo->rgb = (UINT8*)malloc(1); fo->rgb = nullptr;//color rgb どちらか
 
-	//numFmtId
-	//code
-	const char shnumFmId[] = "\"\"¥\"#, ##0; [Red] \"¥\"\ - #, ##0\"";//id 0
+		//fill 設定
+		//------------- ショップ別 フィル色 -----------------//
+		//shoplist
+		const char sholfill[] = "4";//theme 他null
+		fi->fg = (fgcolor*)malloc(sizeof(fgcolor));
+		fi->fg->rgb = (UINT8*)malloc(1); fi->fg->rgb = nullptr;//rgb
+		fi->fg->theme = (UINT8*)malloc(2);
+		memcpy(fi->fg->theme, (UINT8*)sholfill, 2);//theme
+		fi->fg->tint = (UINT8*)malloc(1); fi->fg->tint = nullptr;
+		fi->bg = (bgcolor*)malloc(sizeof(bgcolor));//なければストラクトをヌルに
+		fi->bg = nullptr;
 
-	//xfId
-	//applyBorder applyAlignment
-	const char* shxfids[] = { "0","0","center" };
+		//cellstyleXF 設定
+		UINT8 zero[] = "0";
+		csx->numFmtId = (UINT8*)malloc(2);//numFmId 0
+		memcpy(csx->numFmtId, zero, 2);
 
-	//26 zozo
-	/*-----------------------------------
-	zozo style設定
-	-----------------------------------*/
-	//applyNumberFormat applyAlignment vertical wraptext
-	const char* zowraptext[] = { "1","1","center","1" };
+		//cellstyle なし
+	}
 
-	//font sz theme name family charset scheme
-	const char* zofonts[] = { "11", "1","ＭＳ Ｐゴシック", "2","128","minor" };
+	resultshop = strcmp((const char*)num, zo);
+	if (resultshop==0) {
+		std::cout << "zozo" << std::endl;
+		//------------- ショップ別 フォント色 -----------------//
+		//zozo
+		const char zozotheme[] = "1";//theme
+		fo->color = (UINT8*)malloc(2);//color theme
+		memcpy(fo->color, (UINT8*)zozotheme, 2);
+		fo->rgb = (UINT8*)malloc(1); fo->rgb = nullptr;//color rgb どちらか
 
-	//patternType fgtheme fgtint bgindexed
-	const char* zofill[] = { "solid","4","0.79998168889431442","65" };
+		//------------- ショップ別 フィル色 -----------------//
+		//zozo
+		// fgtheme fgtint bgindexed
+		const char* zofill[] = { "4","0.79998168889431442","65" };
+		fi->fg = (fgcolor*)malloc(sizeof(fgcolor));
+		fi->fg->theme = (UINT8*)malloc(2);
+		memcpy(fi->fg->theme, (UINT8*)zofill[0], 2);//theme
+		fi->fg->tint = (UINT8*)malloc(20);
+		memcpy(fi->fg->tint, (UINT8*)zofill[1], 20);//tint
+		fi->fg->rgb = (UINT8*)malloc(1); fi->fg->rgb = nullptr;//rgb
 
-	//border all null
+		fi->bg = (bgcolor*)malloc(sizeof(bgcolor));//なければストラクトをヌルに
+		fi->bg->indexed = (UINT8*)malloc(3);
+		memcpy(fi->bg->indexed, (UINT8*)zofill[2], 3);//tint
 
-	//numFmtId //code
-	const char zonumFmId[] = "\"\"¥\"#, ##0; [Red] \"¥\"\ - #, ##0\"";//id=0 
+		//cellstyleXF 設定
+		UINT8 zero[] = "0";
+		csx->numFmtId = (UINT8*)malloc(2);//numFmId 0
+		memcpy(csx->numFmtId, zero, 2);
 
-	//xfId
-	//applyBorder applyAlignment
-	const char* zoxfids[] = { "0","0","center" };
+		//cellstyle なし
+	}
 
-	//28 smarby
-	/*-----------------------------------
-	smarby style設定
-	-----------------------------------*/
-	//applyNumberFormat applyAlignment vertical wraptext
-	const char* smwraptext[] = { "1","1","center","1" };
+	resultshop = strcmp((const char*)num, sm);
+	if (resultshop==0) {
+		std::cout << "smarby" << std::endl;
+		//------------- ショップ別 フォント色 -----------------//
+		//smarby
+		const char smtheme[] = "1";//theme
+		fo->color = (UINT8*)malloc(2);//color theme
+		memcpy(fo->color, (UINT8*)smtheme, 2);
+		fo->rgb = (UINT8*)malloc(1); fo->rgb = nullptr;//color rgb どちらか
 
-	//font sz theme name family charset scheme
-	const char* smfonts[] = { "11", "1","ＭＳ Ｐゴシック", "2","128","minor" };
+		//------------- ショップ別 フィル色 -----------------//
+		//smarby
+		const char* smfill[] = { "5","0.79998168889431442","65" };
+		fi->fg = (fgcolor*)malloc(sizeof(fgcolor));
+		fi->fg->theme = (UINT8*)malloc(2);
+		memcpy(fi->fg->theme, (UINT8*)smfill[0], 2);//theme
+		fi->fg->tint = (UINT8*)malloc(20);
+		memcpy(fi->fg->tint, (UINT8*)smfill[1], 20);//tint
+		fi->fg->rgb = (UINT8*)malloc(1); fi->fg->rgb = nullptr;//rgb
 
-	//patternType fgtheme
-	const char* smfill[] = { "solid","5","0.79998168889431442","65" };
+		fi->bg = (bgcolor*)malloc(sizeof(bgcolor));//なければストラクトをヌルに
+		fi->bg->indexed = (UINT8*)malloc(3);
+		memcpy(fi->bg->indexed, (UINT8*)smfill[2], 3);//tint
 
-	//border all null
+		//cellstyleXF 設定
+		UINT8 zero[] = "0";
+		csx->numFmtId = (UINT8*)malloc(2);//numFmId 0
+		memcpy(csx->numFmtId, zero, 2);
 
-	//numFmtId //code
-	const char smnumFmId[] = "\"\"¥\"#, ##0; [Red] \"¥\"\ - #, ##0\"";//id=0
+		//cellstyle なし
+	}
 
-	//xfId
-	//applyBorder applyAlignment
-	const char* smxfids[] = { "0","0","center" };
+	resultshop = strcmp((const char*)num, ms);
+	if (resultshop==0) {
+		std::cout << "magaseek : " << std::endl;
+		//------------- ショップ別 フォント色 -----------------//
+		//magaseek
+		const char mstheme[] = "1";//theme
+		fo->color = (UINT8*)malloc(2);//color theme
+		memcpy(fo->color, (UINT8*)mstheme, 2);
+		fo->rgb = (UINT8*)malloc(1); fo->rgb = nullptr;//color rgb どちらか
 
-	//30 magaseek
-	/*-----------------------------------
-	magaseek style設定
-	-----------------------------------*/
-	//applyNumberFormat applyAlignment vertical wraptext
-	const char* mawraptext[] = { "1","1","center","1" };
+		//------------- ショップ別 フィル色 -----------------//
+		//magaseek
+		const char* mafill[] = { "6","0.79998168889431442","65" };
+		fi->fg = (fgcolor*)malloc(sizeof(fgcolor));
+		fi->fg->theme = (UINT8*)malloc(2);
+		memcpy(fi->fg->theme, (UINT8*)mafill[0], 2);//theme
+		fi->fg->tint = (UINT8*)malloc(20);
+		memcpy(fi->fg->tint, (UINT8*)mafill[1], 20);//tint
+		fi->fg->rgb = (UINT8*)malloc(1); fi->fg->rgb = nullptr;
 
-	//font sz theme name family charset scheme
-	const char* mafonts[] = { "11", "1","ＭＳ Ｐゴシック", "2","128","minor" };
-	//patternType fgtheme
-	const char* mafill[] = { "solid","6","0.79998168889431442","65" };
+		fi->bg = (bgcolor*)malloc(sizeof(bgcolor));//なければストラクトをヌルに
+		fi->bg->indexed = (UINT8*)malloc(3);
+		memcpy(fi->bg->indexed, (UINT8*)mafill[2], 3);//tint
 
-	//border all null
+		//cellstyleXF 設定
+		UINT8 zero[] = "0";
+		csx->numFmtId = (UINT8*)malloc(2);//numFmId 0
+		memcpy(csx->numFmtId, zero, 2);
 
-	//numFmtId //code
-	const char manumFmId[] = "\"\"¥\"#, ##0; [Red] \"¥\"\ - #, ##0\"";//id=0
+		//cellstyle なし
+	}
 
-	//xfId
-	//applyBorder applyAlignment
-	const char* maxfids[] = { "0","0","center" };
+	/*フォントidの検索*/
+	fontnumb = searchfonts(fo);
+	if (fontnumb != -1)
+	{
+		cx->fontId = strchange.InttoChar(fontnumb, &place);//一致番号入力　fontID 加える
+		csx->fontId = strchange.InttoChar(fontnumb, &place);
+		free(fo->sz); free(fo->rgb); free(fo->family); free(fo->charset); free(fo->scheme); free(fo->color); free(fo);
+	}
+	else {
+		cx->fontId = (UINT8*)malloc(1); cx->fontId = nullptr;//cellxfs font null
+		csx->fontId = (UINT8*)malloc(1); csx->fontId = nullptr;
+		//フォント設定追加　必要
+	}
 
+	/*フィルidの検索*/
+	fontnumb = searchfills(fi);
+	if (fontnumb != -1)
+	{
+		cx->fillId = strchange.InttoChar(fontnumb, &place);//一致番号入力 フィルID加える
+		csx->fillId = strchange.InttoChar(fontnumb, &place);
+		free(fi->patten->patternType); free(fi->fg->rgb); free(fi->fg->theme); free(fi->fg->tint); free(fi->bg); free(fi->fg);
+		free(fi->patten); free(fi);
+	}
+	else {
+		cx->fillId = (UINT8*)malloc(1); cx->fillId = nullptr;//cellxfs font null
+		csx->fillId = (UINT8*)malloc(1); csx->fillId = nullptr;
+		//フィル設定追加　必要
+	}
+
+	/*ボーダーidの検索*/
+	fontnumb = searchborders(bd);
+	if (fontnumb != -1)
+	{
+		cx->borderId = strchange.InttoChar(fontnumb, &place);//一致番号入力 ボーダー設定加える
+		csx->borderId = strchange.InttoChar(fontnumb, &place);
+		free(bd->left); free(bd->right); free(bd->top); free(bd->bottom); free(bd->diagonal); free(bd);
+	}
+	else {
+		cx->borderId = (UINT8*)malloc(1); cx->fillId = nullptr;//cellxfs font null
+		csx->borderId = (UINT8*)malloc(1); csx->fillId = nullptr;
+		//ボーダー設定追加　必要
+	}
+
+	//cellstyle xfs 番号取得
+	resultshop = strcmp((const char*)num, be);
+	if (resultshop != 0) {
+		//bee 以外　xfId取得
+		fontnumb = searchcellstylexfs(csx);
+		if (fontnumb != -1) {
+			cx->xfId = strchange.InttoChar(fontnumb, &place);//一致番号入力 bee以外はこっち
+			free(csx->applyAlignment); free(csx->applyBorder); free(csx->applyFont); free(csx->applyNumberFormat); free(csx->applyProtection);
+			free(csx->Avertical); free(csx);
+		}
+		else {
+			//cellstyle xfs 設定追加　必要
+			std::cout << "need add cellstyleXfs" << std::endl;
+			cellstyleXfsRoot=addstylexf(cellstyleXfsRoot, csx->numFmtId, csx->fontId, csx->fillId, csx->borderId, csx->applyNumberFormat, csx->applyBorder, csx->applyAlignment, csx->applyProtection, csx->Avertical, csx->applyFont);
+			CountincIiment(cellStyleXfsCount);
+		}
+	}
+	else {
+		//------------- セルスタイル設定-----------------//
+		//bee だけ　スタイルセット検索
+		cs = (cellstyle*)malloc(sizeof(cellstyle));
+		//name xr:uid xfid
+		const char* celsty[] = { "良い 11 10 2 3 2 2 2 4 2 2" ,"{00000000-0005-0000-0000-000039000000}" ,"58" };
+		char styname[255] = { 0 };
+		char* cstyn = nullptr;
+		cstyn = SJIStoUTF8((char*)celsty[0], styname, 255);//フォントname UTF-8に変換
+
+		cs->name = (UINT8*)cstyn;
+		cs->xruid = (UINT8*)malloc(39);
+		cs->xfId = (UINT8*)malloc(3);
+		memcpy(cs->xruid, (UINT8*)celsty[1], 39);
+		memcpy(cs->xfId, (UINT8*)celsty[2], 3);
+		cs->customBuilt = (UINT8*)malloc(1); cs->customBuilt = nullptr;
+		cs->builtinId = (UINT8*)malloc(1); cs->builtinId = nullptr;
+
+		fontnumb = searchcellstyle(cs);
+		if (fontnumb != -1) {
+			//style set 設定あり 
+			cx->xfId= (UINT8*)malloc(3);
+			memcpy(cx->xfId, (UINT8*)celsty[2], 3);
+		}
+		//free(cs->name); 
+		free(cs->xfId); free(cs->builtinId); free(cs->xruid); free(cs);
+	}
+
+	//style 決定
+	fontnumb = searchcellxfs(cx);
+	if (fontnumb != -1)
+	{
+		style = strchange.InttoChar(fontnumb, &place);//一致番号入力　style 決定
+		std::cout << "style : " << style << std::endl;
+		free(cx->fontId);
+		free(cx->fillId); free(cx->applyAlignment); free(cx->applyBorder); free(cx->applyFill); free(cx->applyFont);
+		free(cx->applyNumberFormat);  free(cx->borderId);
+		free(cx->numFmtId); free(cx->xfId); free(cx->AwrapText);
+		free(cx->Avertical);
+	}
+	else {
+		style = (UINT8*)malloc(1); style = nullptr;//cellxfs font null
+		//xfID 設定追加　必要
+	}
 
 	//UINT32 stylenum = strchange.RowArraytoNum(num, strlen((const char*)num));//style 番号　数字に変換
 }

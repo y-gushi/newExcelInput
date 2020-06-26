@@ -155,12 +155,12 @@ int main(char* fname[], int i) {
             //26 zozo 25
             //28 smarby
             //30 magaseek
-            while (stylec < 177 && sr->cellXfsRoot) {
+            while (stylec < 30 && sr->cellXfsRoot) {
                 sr->cellXfsRoot = sr->cellXfsRoot->next;
                 stylec++;
             }
             ArrayNumber* changeStr = new ArrayNumber;
-            std::cout << "style 177 " << std::endl;
+            std::cout << "style 30 " << std::endl;
 
             if (sr->cellXfsRoot->numFmtId)
                 std::cout << "numFmtId : " << sr->cellXfsRoot->numFmtId << std::endl;
@@ -285,59 +285,59 @@ int main(char* fname[], int i) {
 
             //xfId 検索
             place = 0;
+            stylexf* cxs = sr->cellstyleXfsRoot;
             while (sr->cellXfsRoot->xfId[place] != '\0')
                 place++;
             fontnum = changeStr->RowArraytoNum(sr->cellXfsRoot->xfId, place);
             stylec = 0;
             while (stylec < fontnum) {
-                sr->cellstyleXfsRoot = sr->cellstyleXfsRoot->next;
+                cxs = cxs->next;
                 stylec++;
             }
             std::cout << std::endl;
             std::cout << "xfId検索 " << fontnum << std::endl;
             std::cout << std::endl;
-            if (sr->cellstyleXfsRoot->numFmtId)
-                std::cout << "numFmtId : " << sr->cellstyleXfsRoot->numFmtId << std::endl;
-            if (sr->cellstyleXfsRoot->fontId)
-                std::cout << "fontId : " << sr->cellstyleXfsRoot->fontId << std::endl;
-            if (sr->cellstyleXfsRoot->fillId)
-                std::cout << "fillId : " << sr->cellstyleXfsRoot->fillId << std::endl;
-            if (sr->cellstyleXfsRoot->borderId)
-                std::cout << "borderId : " << sr->cellstyleXfsRoot->borderId << std::endl;
-            if (sr->cellstyleXfsRoot->applyNumberFormat)
-                std::cout << "applyNumberFormat : " << sr->cellstyleXfsRoot->applyNumberFormat << std::endl;
-            if (sr->cellstyleXfsRoot->applyFont)
-                std::cout << "applyFont : " << sr->cellstyleXfsRoot->applyFont << std::endl;
-            if (sr->cellstyleXfsRoot->applyBorder)
-                std::cout << "applyBorder : " << sr->cellstyleXfsRoot->applyBorder << std::endl;
-            if (sr->cellstyleXfsRoot->applyAlignment)
-                std::cout << "applyAlignment : " << sr->cellstyleXfsRoot->applyAlignment << std::endl;
-            if (sr->cellstyleXfsRoot->applyProtection)
-                std::cout << "applyProtection : " << sr->cellstyleXfsRoot->applyProtection << std::endl;
-            if (sr->cellstyleXfsRoot->Avertical)
-                std::cout << "vertical : " << sr->cellstyleXfsRoot->Avertical << std::endl;
+            if (cxs->numFmtId)
+                std::cout << "numFmtId : " << cxs->numFmtId << std::endl;
+            if (cxs->fontId)
+                std::cout << "fontId : " << cxs->fontId << std::endl;
+            if (cxs->fillId)
+                std::cout << "fillId : " << cxs->fillId << std::endl;
+            if (cxs->borderId)
+                std::cout << "borderId : " << cxs->borderId << std::endl;
+            if (cxs->applyNumberFormat)
+                std::cout << "applyNumberFormat : " << cxs->applyNumberFormat << std::endl;
+            if (cxs->applyFont)
+                std::cout << "applyFont : " << cxs->applyFont << std::endl;
+            if (cxs->applyBorder)
+                std::cout << "applyBorder : " << cxs->applyBorder << std::endl;
+            if (cxs->applyAlignment)
+                std::cout << "applyAlignment : " << cxs->applyAlignment << std::endl;
+            if (cxs->applyProtection)
+                std::cout << "applyProtection : " << cxs->applyProtection << std::endl;
+            if (cxs->Avertical)
+                std::cout << "vertical : " << cxs->Avertical << std::endl;
 
             //numfmid 検索
             place = 0;
             stylec = 0;
             int res = 0;
-            while (sr->numFmtsRoot && sr->cellstyleXfsRoot->numFmtId[0]!='0') {
+            while (sr->numFmtsRoot && cxs->numFmtId[0]!='0') {
 
-                res = strcmp((const char*)sr->numFmtsRoot->Id, (const char*)(sr->cellstyleXfsRoot->numFmtId));
+                res = strcmp((const char*)sr->numFmtsRoot->Id, (const char*)(cxs->numFmtId));
                 if (res == 0)
                     break;
                 sr->numFmtsRoot = sr->numFmtsRoot->next;
             }
             std::cout << std::endl;
-            std::cout << "numFmtId検索 " << sr->cellstyleXfsRoot->numFmtId << std::endl;
+            std::cout << "numFmtId検索 " << cxs->numFmtId << std::endl;
             std::cout << std::endl;
             if (sr->numFmtsRoot->Id)
                 std::cout << "numFmtId : " << sr->numFmtsRoot->Id << std::endl;
             if (sr->numFmtsRoot->Code)
                 std::cout << "code : " << sr->numFmtsRoot->Code << std::endl;
-
             
-            UINT8 be[] = "bee";
+            UINT8 be[] = "magaseek";
             sr->configstyle(be);
             
             delete Hdeco;//デコードデータ　削除

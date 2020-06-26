@@ -1144,19 +1144,19 @@ void styleread::readCellXfs(UINT8* d) {
 	const char starttag[] = "<xf";//3•¶Žš
 
 	UINT8 stag[4] = { 0 };//3•¶Žš
-	UINT8 endtag[14] = { 0 };//13•¶Žš
+	UINT8 endtag[11] = { 0 };//10•¶Žš
 
 	int result = 1;
 	int sresult = 0;
 
 	while (result != 0) {
-		for (int i = 0; i < 13 - 1; i++) {
+		for (int i = 0; i < 10 - 1; i++) {
 			endtag[i] = endtag[i + 1];
 			if (i < 2)
 				stag[i] = stag[i + 1];
 		}
-		endtag[12] = stag[2] = d[readp];
-		endtag[13] = stag[3] = '\0';
+		endtag[9] = stag[2] = d[readp];
+		endtag[10]= stag[3] = '\0';
 		readp++;
 
 		sresult = strncmp((const char*)stag, starttag, 3);
@@ -1165,7 +1165,7 @@ void styleread::readCellXfs(UINT8* d) {
 			getCellXfsV(d);
 		}
 
-		result = strncmp((const char*)endtag, Ecellsty, 13);
+		result = strncmp((const char*)endtag, Exfs, 10);
 	}
 }
 
@@ -1241,6 +1241,8 @@ void styleread::readnumFmt(UINT8* d) {
 }
 //cellstyle ’lŽæ“¾
 void styleread::getcellStyle(UINT8* d) {
+	std::cout << "get cellstyle" << std::endl;
+	std::cout << std::endl;
 	const char name[] = "name=\"";//6•¶Žš
 	const char xfId[] = "xfId=\"";//6•¶Žš
 	const char builtinId[] = "builtinId=\"";//11•¶Žš
@@ -1327,17 +1329,17 @@ void styleread::readcellStyles(UINT8* d) {
 	while (eresu != 0) {
 		for (int i = 0; i < 12; i++) {
 			etag[i] = etag[i + 1];
-			if (i < 10)
+			if (i < 9)
 				stag[i] = stag[i + 1];
 		}
-		etag[12] = stag[10] = d[readp];
-		etag[13] = stag[11] = '\0';
+		etag[12] = stag[9] = d[readp];
+		etag[13] = stag[10] = '\0';
 		readp++;
 
 		result = strncmp((const char*)stag, cellStyle, 10);
 		if (result == 0) {
 			//read values
-			getnumFmts(d);
+			getcellStyle(d);
 		}
 
 		eresu = strncmp((const char*)etag, Ecellsty, 13);
