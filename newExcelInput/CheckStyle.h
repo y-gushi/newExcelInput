@@ -447,7 +447,7 @@ inline int checkstyle::strcompare(UINT8* sl, UINT8* sr)
 	return result;
 }
 
-inline void checkstyle::configstyle(UINT8* num)
+inline UINT8* checkstyle::configstyle(UINT8* num)
 {
 	Fonts* fo = (Fonts*)malloc(sizeof(Fonts));
 	Fills* fi = (Fills*)malloc(sizeof(Fills));
@@ -747,6 +747,33 @@ inline void checkstyle::configstyle(UINT8* num)
 		cx->fillId = (UINT8*)malloc(1); cx->fillId = nullptr;//cellxfs font null
 		csx->fillId = (UINT8*)malloc(1); csx->fillId = nullptr;
 		//フィル設定追加　必要
+		size_t resiz = fillNum + 1;
+		Fills** rexfs = nullptr;
+
+		rexfs = (borders**)realloc(fill, resiz);
+		if (!rexfs) {
+			std::cout << "not keep memory" << std::endl;
+			UINT8 er[] = "memory error";
+			return er;
+		}
+
+		std::cout << "need add cellstyleXfs" << std::endl;
+
+		rexfs[borderNum] = (borders*)malloc(sizeof(borders));
+		rexfs[borderNum]->left = bd->left;
+		rexfs[borderNum]->right = bd->right;
+		rexfs[borderNum]->top = bd->top;
+		rexfs[borderNum]->left = bd->left;
+		rexfs[borderNum]->bottom = bd->bottom;
+		rexfs[borderNum]->diagonal = bd->diagonal;
+
+		bocount++; borderNum++;//ボーダー数プラス
+
+		free(borderCount);
+		borderCount = strchange.InttoChar(borderNum, &place);
+
+		cx->borderId = strchange.InttoChar(borderNum, &place);
+		csx->borderId = strchange.InttoChar(borderNum, &place);
 	}
 
 	/*ボーダーidの検索*/
@@ -758,9 +785,36 @@ inline void checkstyle::configstyle(UINT8* num)
 		free(bd->left); free(bd->right); free(bd->top); free(bd->bottom); free(bd->diagonal); free(bd);
 	}
 	else {
-		cx->borderId = (UINT8*)malloc(1); cx->fillId = nullptr;//cellxfs font null
-		csx->borderId = (UINT8*)malloc(1); csx->fillId = nullptr;
+
 		//ボーダー設定追加　必要
+		size_t resiz = borderNum + 1;
+		borders** rexfs = nullptr;
+
+		rexfs = (borders**)realloc(BorderRoot, resiz);
+		if (!rexfs) {
+			std::cout << "not keep memory" << std::endl;
+			UINT8 er[] = "memory error";
+			return er;
+		}
+
+		std::cout << "need add cellstyleXfs" << std::endl;
+
+		rexfs[borderNum] = (borders*)malloc(sizeof(borders));
+		rexfs[borderNum]->left = bd->left;
+		rexfs[borderNum]->right = bd->right;
+		rexfs[borderNum]->top = bd->top;
+		rexfs[borderNum]->left = bd->left;
+		rexfs[borderNum]->bottom = bd->bottom;
+		rexfs[borderNum]->diagonal = bd->diagonal;
+
+		bocount++; borderNum++;//ボーダー数プラス
+
+		free(borderCount);
+		borderCount = strchange.InttoChar(borderNum, &place);
+
+		cx->borderId = strchange.InttoChar(borderNum, &place);
+		csx->borderId = strchange.InttoChar(borderNum, &place);
+
 	}
 
 	//cellstyle xfs 番号取得
@@ -775,23 +829,39 @@ inline void checkstyle::configstyle(UINT8* num)
 		}
 		else {
 			//cellstyle xfs 設定追加　必要
+
+			size_t resiz = cellstyleXfsNum + 1;
+			stylexf** rexfs = nullptr;
+
+			rexfs = (stylexf**)realloc(cellstyleXfsRoot, resiz);
+			if (!rexfs) {
+				std::cout << "not keep memory" << std::endl;
+				UINT8 er[] = "memory error";
+				return er;
+			}
+
 			std::cout << "need add cellstyleXfs" << std::endl;
 			
-			cellstyleXfsRoot[csXcount] = (stylexf*)malloc(sizeof(stylexf));
-			cellstyleXfsRoot[csXcount]->numFmtId = csx->numFmtId;
-			cellstyleXfsRoot[csXcount]->fontId = csx->fontId;
-			cellstyleXfsRoot[csXcount]->fillId = csx->fillId;
-			cellstyleXfsRoot[csXcount]->borderId = csx->borderId;
-			cellstyleXfsRoot[csXcount]->applyNumberFormat = csx->applyNumberFormat;
-			cellstyleXfsRoot[csXcount]->applyBorder = csx->applyBorder;
-			cellstyleXfsRoot[csXcount]->applyAlignment = csx->applyAlignment;
-			cellstyleXfsRoot[csXcount]->applyProtection = csx->applyProtection;
-			cellstyleXfsRoot[csXcount]->Avertical = csx->Avertical;//alignment vertical
-			cellstyleXfsRoot[csXcount]->applyFont = csx->applyFont;
-			cellstyleXfsRoot[csXcount]->applyFill = csx->applyFill;
+			rexfs[csXcount] = (stylexf*)malloc(sizeof(stylexf));
+			rexfs[csXcount]->numFmtId = csx->numFmtId;
+			rexfs[csXcount]->fontId = csx->fontId;
+			rexfs[csXcount]->fillId = csx->fillId;
+			rexfs[csXcount]->borderId = csx->borderId;
+			rexfs[csXcount]->applyNumberFormat = csx->applyNumberFormat;
+			rexfs[csXcount]->applyBorder = csx->applyBorder;
+			rexfs[csXcount]->applyAlignment = csx->applyAlignment;
+			rexfs[csXcount]->applyProtection = csx->applyProtection;
+			rexfs[csXcount]->Avertical = csx->Avertical;//alignment vertical
+			rexfs[csXcount]->applyFont = csx->applyFont;
+			rexfs[csXcount]->applyFill = csx->applyFill;
 			
-			csXcount++;
-			CountincIiment(cellStyleXfsCount);
+			csXcount++; cellstyleXfsNum++;
+
+			free(cellStyleXfsCount);
+			cellStyleXfsCount = strchange.InttoChar(dxfsNm, &place);
+
+			cx->xfId= strchange.InttoChar(dxfsNm, &place);
+
 		}
 	}
 	else {
@@ -835,8 +905,37 @@ inline void checkstyle::configstyle(UINT8* num)
 		free(cx->Avertical);
 	}
 	else {
-		style = (UINT8*)malloc(1); style = nullptr;//cellxfs font null
+		
 		//xfID 設定追加　必要
+		size_t resiz = dxfsNm + 1;
+		cellxfs** rexfs = nullptr;
+
+		rexfs = (cellxfs**)realloc(cellXfsRoot, resiz);
+		if (!rexfs) {
+			std::cout << "not keep memory" << std::endl;
+			UINT8 er[] = "memory error";
+			return er;
+		}
+		rexfs[dxfsNm] = (cellxfs*)malloc(sizeof(cellxfs));
+		rexfs[dxfsNm]->fontId = cx->fontId;
+		rexfs[dxfsNm]->fillId = cx->fillId;
+		rexfs[dxfsNm]->applyAlignment = cx->applyAlignment;
+		rexfs[dxfsNm]->applyBorder = cx->applyBorder;
+		rexfs[dxfsNm]->applyFill = cx->applyFill;
+		rexfs[dxfsNm]->applyFont = cx->applyFont;
+		rexfs[dxfsNm]->applyNumberFormat = cx->applyNumberFormat;
+		rexfs[dxfsNm]->borderId = cx->borderId;
+		rexfs[dxfsNm]->numFmtId = cx->numFmtId;
+		rexfs[dxfsNm]->xfId = cx->xfId;
+		rexfs[dxfsNm]->AwrapText = cx->AwrapText;
+		rexfs[dxfsNm]->Avertical = cx->Avertical;
+
+		dxfsNm++; dxcount++;
+		free(dxfsCount);
+		dxfsCount = strchange.InttoChar(dxfsNm, &place);
+
+		style = (UINT8*)malloc(place+1); 
+		memcpy(style,dxfsCount,place+1);//cellxfs font null
 	}
 
 	//UINT32 stylenum = strchange.RowArraytoNum(num, strlen((const char*)num));//style 番号　数字に変換
