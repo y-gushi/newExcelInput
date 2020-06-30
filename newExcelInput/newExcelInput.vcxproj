@@ -164,6 +164,7 @@
   <ItemGroup>
     <ClInclude Include="bitInOut.h" />
     <ClInclude Include="ChangeArrayNumber.h" />
+    <ClInclude Include="CheckStyle.h" />
     <ClInclude Include="compressdata.h" />
     <ClInclude Include="CRC.h" />
     <ClInclude Include="decord.h" />
@@ -179,6 +180,7 @@
     <ClInclude Include="ShipDataRead.h" />
     <ClInclude Include="slidewindow.h" />
     <ClInclude Include="StrMargeAndSearch.h" />
+    <ClInclude Include="StyleWrite.h" />
     <ClInclude Include="TagAndItems.h" />
     <ClInclude Include="timeget.h" />
     <ClInclude Include="typechange.h" />

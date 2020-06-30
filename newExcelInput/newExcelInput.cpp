@@ -62,14 +62,9 @@ char* convchar(wchar_t* a) {
     size_t convertedChars = 0;
 
     const size_t newsize = origsize * 2;
-    // The new string will contain a converted copy of the original
-    // string plus the type of string appended to it.
     char* nstring = new char[newsize];
 
-    // Put a copy of the converted string into nstring
     wcstombs_s(&convertedChars, nstring, newsize, a, _TRUNCATE);
-    // append the type of string to the new string.
-    //_mbscat_s((unsigned char*)nstring, newsize + strConcatsize, (unsigned char*)strConcat);
 
     return nstring;
 }
@@ -79,8 +74,8 @@ int main(char* fname[], int i) {
     // メモリリーク検出
     //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-    char PLfn[] = "C:/Users/Bee/Desktop/LY200620-A  ゾゾ.xlsx"; //読み込むファイルの指定 /LY20191127-SHIP BEE だけ.xlsx
-    char Zfn[] = "C:/Users/Bee/Desktop/【1 縦売り 春・秋・冬】在庫状況.xlsx";
+    char PLfn[] = "C:/Users/Bee/Desktop/LY200623-A ゾゾ.xlsx"; //読み込むファイルの指定 /LY20191127-SHIP BEE だけ.xlsx
+    char Zfn[] = "C:/Users/Bee/Desktop/【1 縦売り 夏】在庫状況.xlsx";
     char mfile[] = "C:/Users/Bee/Desktop/test[システム]test.xlsx"; //テスト書き出し
     char recd[] = "C:/Users/Bee/Desktop/Centraldata"; //テスト書き出し
     
@@ -197,6 +192,7 @@ int main(char* fname[], int i) {
     /*-----------------------
     shareシート読み込み
     -----------------------*/
+    
     std::ifstream Zr(Zfn, std::ios::in | std::ios::binary);
 
     HeaderRead* hr2 = new HeaderRead(Zfn);
@@ -250,22 +246,12 @@ int main(char* fname[], int i) {
     std::cout << "day : " << sg->day << std::endl;
     sharedata= sharray->writeshare(sg->day, sg->daylen, inptxt, txtnum);//share文字列書き込み share data更新
     UINT64 shrelength = sharray->writeleng;
-
-    /*
-    delete sharray;
-    sharray = new shareRandD(sharedata, shrelength);//更新したシェアデータを配列に
-    sharray->getSicount();//get si count
-    sharray->ReadShare();//文字列読み込み
-    */
-    //free(sharedata);
-    /*for (int t = 0; t < txtnum; t++) {//文字列解放
-        free(splstr[t]);
-    }*/
+    
 
     /*--------------------------
     share data書き込み　圧縮
     ---------------------------*/
- 
+
     //ファイル書き出し用
     _Post_ _Notnull_ FILE* cdf;
     fopen_s(&cdf, recd, "wb");
@@ -313,6 +299,7 @@ int main(char* fname[], int i) {
      /*-----------------------
     スタイルシート読み込み
     -----------------------*/
+
     hr2=new HeaderRead(Zfn);
     hr2->endread(&Zr);//終端コードの読み込み
 

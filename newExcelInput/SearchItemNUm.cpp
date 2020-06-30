@@ -215,7 +215,9 @@ void searchItemNum::colorsearch(Row* inrow, Items* IT, UINT8* itn) {
                                         rootMat = addmatches(rootMat, itn, nowColor);//カラー、サイズ一致で保存
 
                                         UINT8* nr = changenum.InttoChar(color->r, &result);
-                                        Cels->addcelldata(nr, incolumn, nullptr, (UINT8*)style[0], sizeMatch, nullptr, nullptr);
+                                        UINT8* stl = (UINT8*)malloc(5);
+                                        memcpy(stl, style[0], 5);
+                                        Cels->addcelldata(nr, incolumn, nullptr, stl, sizeMatch, nullptr, nullptr);
 
                                         /*
                                         if (beforeColor) {

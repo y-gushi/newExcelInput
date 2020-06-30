@@ -1288,11 +1288,11 @@ void Ctags::Ctablefree(C* c) {
 
     while (c) {
         q = c->next;  /* ŽŸ‚Ö‚Ìƒ|ƒCƒ“ƒ^‚ð•Û‘¶ */
-        free(c->val);
-        free(c->t);
-        free(c->s);
-        free(c->si);
-        free(c->f);
+        //free(c->val);
+        //free(c->t);
+        //free(c->s);
+        //free(c->si);
+        //free(c->f);
 
         free(c);
         c = q;
