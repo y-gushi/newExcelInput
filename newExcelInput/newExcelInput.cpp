@@ -18,7 +18,7 @@
 #include "atlstr.h"
 #include "comutil.h"
 
-#include "excel_style.h"
+#include "CheckStyle.h"
 
 #include <locale.h>
 
@@ -317,9 +317,15 @@ int main(char* fname[], int i) {
         Sdeco->dataread(hr2->LH->pos, cddata->nonsize);
     }
 
-    styleread* sr = new styleread();
+    checkstyle* sr = new checkstyle();
     
     sr->readstyle(Sdeco->ReadV, Sdeco->readlen);
+    sr->styledatawrite(Sdeco->readlen);
+
+    for (int swr = 0; swr < sr->wdlen; swr++)
+        sr->wd[swr];
+
+
 
     delete Sdeco;
     delete sr;

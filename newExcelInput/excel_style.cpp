@@ -53,8 +53,11 @@ styleread::styleread()
 styleread::~styleread()
 {
 	/*
-	freefonts(fontRoot);
-	freefill(fillroot);
+	for(int i=0;i<fontNum;i++)
+		freefonts(fontRoot[i]);
+	for (int i = 0; i < fillNum; i++)
+		freefill(fillroot[i]);
+	
 	freeborder(BorderRoot);
 	freestylexf(cellstyleXfsRoot);
 	freecellxfs(cellXfsRoot);

@@ -8,7 +8,7 @@ class checkstyle:public StyleWrite
 public:
 	UINT8* style = nullptr;//s 決定
 
-	checkstyle(FILE* f);
+	checkstyle();
 	~checkstyle();
 
 	int searchfonts(Fonts* fs);
@@ -31,7 +31,7 @@ public:
 
 	int strcompare(UINT8* sl, UINT8* sr);
 
-	void configstyle(UINT8* num);
+	UINT8* configstyle(UINT8* num);
 
 	char* SJIStoUTF8(char* szSJIS, char* bufUTF8, int size);
 
@@ -43,7 +43,7 @@ private:
 	char ms[9] = "magaseek";
 };
 
-checkstyle::checkstyle(FILE* f)
+checkstyle::checkstyle()
 {
 }
 
@@ -729,9 +729,45 @@ inline UINT8* checkstyle::configstyle(UINT8* num)
 		free(fo->sz); free(fo->rgb); free(fo->family); free(fo->charset); free(fo->scheme); free(fo->color); free(fo);
 	}
 	else {
-		cx->fontId = (UINT8*)malloc(1); cx->fontId = nullptr;//cellxfs font null
-		csx->fontId = (UINT8*)malloc(1); csx->fontId = nullptr;
 		//フォント設定追加　必要
+
+		size_t resiz = fontNum + 1;
+		Fonts** rexfs = nullptr;
+
+		rexfs = (Fonts**)realloc(fillroot, resiz);
+
+		for (int i = 0; i < fontNum; i++)
+			freefonts(fontRoot[i]);
+
+		fontRoot = rexfs;
+
+		if (!rexfs) {
+			std::cout << "not keep memory" << std::endl;
+			UINT8 er[] = "memory error";
+			return er;
+		}
+		else {
+			for (int i = 0; i < fontNum; i++)
+				freefonts(fontRoot[i]);
+		}
+
+		std::cout << "need add cellstyleXfs" << std::endl;
+
+		rexfs[fillNum] = (Fonts*)malloc(sizeof(Fonts));
+		rexfs[fillNum]->sz = fo->sz;
+		rexfs[fillNum]->rgb = fo->rgb;
+		rexfs[fillNum]->family = fo->family;
+		rexfs[fillNum]->charset = fo->charset;
+		rexfs[fillNum]->scheme = fo->scheme;
+		rexfs[fillNum]->color = fo->color;
+
+		frcount++; fontNum++;//ボーダー数プラス
+
+		free(fontCount);
+		fontCount = strchange.InttoChar(fontNum, &place);
+
+		cx->fontId = strchange.InttoChar(fontNum, &place);
+		csx->fontId = strchange.InttoChar(fontNum, &place);
 	}
 
 	/*フィルidの検索*/
@@ -740,17 +776,15 @@ inline UINT8* checkstyle::configstyle(UINT8* num)
 	{
 		cx->fillId = strchange.InttoChar(fontnumb, &place);//一致番号入力 フィルID加える
 		csx->fillId = strchange.InttoChar(fontnumb, &place);
-		free(fi->patten->patternType); free(fi->fg->rgb); free(fi->fg->theme); free(fi->fg->tint); free(fi->bg); free(fi->fg);
+		free(fi->patten->patternType); free(fi->fg->rgb); free(fi->fg->theme); free(fi->fg->tint); free(fi->bg); free(fi->bg->indexed); free(fi->fg);
 		free(fi->patten); free(fi);
 	}
 	else {
-		cx->fillId = (UINT8*)malloc(1); cx->fillId = nullptr;//cellxfs font null
-		csx->fillId = (UINT8*)malloc(1); csx->fillId = nullptr;
 		//フィル設定追加　必要
 		size_t resiz = fillNum + 1;
 		Fills** rexfs = nullptr;
 
-		rexfs = (borders**)realloc(fill, resiz);
+		rexfs = (Fills**)realloc(fillroot, resiz);
 		if (!rexfs) {
 			std::cout << "not keep memory" << std::endl;
 			UINT8 er[] = "memory error";
@@ -759,21 +793,23 @@ inline UINT8* checkstyle::configstyle(UINT8* num)
 
 		std::cout << "need add cellstyleXfs" << std::endl;
 
-		rexfs[borderNum] = (borders*)malloc(sizeof(borders));
-		rexfs[borderNum]->left = bd->left;
-		rexfs[borderNum]->right = bd->right;
-		rexfs[borderNum]->top = bd->top;
-		rexfs[borderNum]->left = bd->left;
-		rexfs[borderNum]->bottom = bd->bottom;
-		rexfs[borderNum]->diagonal = bd->diagonal;
+		rexfs[fillNum] = (Fills*)malloc(sizeof(Fills));
+		rexfs[fillNum]->patten = (FillPattern*)malloc(sizeof(FillPattern));
+		rexfs[fillNum]->patten->patternType = fi->patten->patternType;
+		rexfs[fillNum]->fg = (fgcolor*)malloc(sizeof(fgcolor));
+		rexfs[fillNum]->fg->rgb = fi->fg->rgb;
+		rexfs[fillNum]->fg->theme = fi->fg->theme;
+		rexfs[fillNum]->fg->tint = fi->fg->tint;
+		rexfs[fillNum]->bg = (bgcolor*)malloc(sizeof(bgcolor));
+		rexfs[fillNum]->bg->indexed = fi->bg->indexed;
 
-		bocount++; borderNum++;//ボーダー数プラス
+		ficount++; fillNum++;//ボーダー数プラス
 
-		free(borderCount);
-		borderCount = strchange.InttoChar(borderNum, &place);
+		free(fillCount);
+		fillCount = strchange.InttoChar(fillNum, &place);
 
-		cx->borderId = strchange.InttoChar(borderNum, &place);
-		csx->borderId = strchange.InttoChar(borderNum, &place);
+		cx->fillId = strchange.InttoChar(fillNum, &place);
+		csx->fillId = strchange.InttoChar(fillNum, &place);
 	}
 
 	/*ボーダーidの検索*/
@@ -939,6 +975,7 @@ inline UINT8* checkstyle::configstyle(UINT8* num)
 	}
 
 	//UINT32 stylenum = strchange.RowArraytoNum(num, strlen((const char*)num));//style 番号　数字に変換
+	return nullptr;
 }
 
 inline char* checkstyle::SJIStoUTF8(char* szSJIS, char* bufUTF8, int size)

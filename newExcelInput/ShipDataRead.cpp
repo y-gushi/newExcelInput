@@ -192,7 +192,7 @@ void shipinfo::GetItems() {
     UINT8* six = (UINT8*)malloc(1); six = nullptr;
     UINT8* f = (UINT8*)malloc(1); f = nullptr;
 
-    shipdataRead();
+    shipdataRead();//C 7 ƒZƒ‹“Ç‚ÝŽæ‚è
 
     searchitemCell();
 
