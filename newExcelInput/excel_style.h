@@ -5,12 +5,14 @@
 #include <iostream>
 
 struct Fonts {
+	UINT8* biu;//Boldなど?
 	UINT8* sz;
 	UINT8* color;
 	UINT8* name;
 	UINT8* family;
 	UINT8* charset;
 	UINT8* scheme;
+	UINT8* indexed;
 	UINT8* rgb;
 	Fonts* next;
 };
@@ -73,6 +75,7 @@ struct stylexf
 	UINT8* borderId;
 	UINT8* applyNumberFormat;
 	UINT8* applyFont;
+	UINT8* applyFill;
 	UINT8* applyBorder;
 	UINT8* applyAlignment;
 	UINT8* applyProtection;
@@ -162,6 +165,11 @@ public:
 	const char Fmts[9] = "<numFmts";
 	const char Efmts[11] = "</numFmts>";
 
+	//書き込み用
+	const char *countstr=" count=\"";
+	
+	UINT32 tescou = 0;
+
 	const char styleSheet[12] = "<styleSheet";
 	const char extLst[9] = "<extLst>";
 
@@ -177,16 +185,33 @@ public:
 	numFMts* numFmtsRoot;
 	cellstyle* cellStyleRoot;
 	Dxf* dxfRoot;
+	colors* colorsRoot;
 
 	UINT8* fontCount;
+	UINT32 fontNum = 0;//フォントカウント数値変換
+
 	UINT8* kFonts;
+
 	UINT8* fillCount;
+	UINT32 fillNum = 0;//フィルカウント数値変換
+
 	UINT8* borderCount;
+	UINT32 borderNum = 0;//ボーダーカウント数値変換
+
 	UINT8* cellStyleXfsCount;
+	UINT32 cellstyleXfsNum = 0;
+
 	UINT8* cellXfsCount;
+	UINT32 cellXfs = 0;
+
 	UINT8* numFmtsCount;
+	UINT32 numFmtsNum = 0;
+
 	UINT8* cellstyleCount;
+	UINT32 cellstyleNum = 0;
+
 	UINT8* dxfsCount;
+	UINT32 dxfsNu = 0;
 
 	UINT8* styleSheetStr;
 	UINT8* extLstStr;
@@ -210,13 +235,13 @@ public:
 
 	void freeDxf(Dxf* f);
 
-	Fonts* addfonts(Fonts* f, UINT8* sz, UINT8* co, UINT8* na, UINT8* fa, UINT8* cha, UINT8* sch, UINT8* rg);
+	Fonts* addfonts(Fonts* f, UINT8* b, UINT8* sz, UINT8* co, UINT8* na, UINT8* fa, UINT8* cha, UINT8* sch, UINT8* rg, UINT8* ind);
 
 	Fills* addfill(Fills* fi, FillPattern* p, fgcolor* f, bgcolor* b);
 
 	borders* addborder(borders* b, borderstyle* l, borderstyle* r, borderstyle* t, borderstyle* bo, borderstyle* d);
 
-	stylexf* addstylexf(stylexf* sx, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* ap, UINT8* av, UINT8* af);
+	stylexf* addstylexf(stylexf* sx, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* ap, UINT8* av, UINT8* af, UINT8* afil);
 
 	cellxfs* addcellxfs(cellxfs* c, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* av, UINT8* at, UINT8* ho, UINT8* afo, UINT8* afi, UINT8* xid);
 
@@ -272,7 +297,7 @@ public:
 
 	void readdxfs(UINT8* d);
 
-	colors* getcolor(UINT8* d);
+	void getcolor(UINT8* d);
 
 	void readcolors(UINT8* d);
 

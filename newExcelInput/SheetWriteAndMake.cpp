@@ -22,7 +22,7 @@ void Ctags::addcelldata(UINT8* row, UINT8* col, UINT8* t, UINT8* s, UINT8* v, F*
 
     ro = searchRow(rows, rn);//row位置検索
     if (!ro) {
-        std::cout << "row なし 追加" << std::endl;
+        //std::cout << "row なし 追加" << std::endl;
         int cnpl = 0;//桁数　使わない
         
         UINT32 newcn = NA.ColumnCharnumtoNumber(cn);//列番号連番へ　入れた列
@@ -40,13 +40,13 @@ void Ctags::addcelldata(UINT8* row, UINT8* col, UINT8* t, UINT8* s, UINT8* v, F*
         ro = searchRow(rows, rn);
 
         //cell null データ入れる
-        std::cout << " セル追加 rowなし : " << ro->r << " 行 " << cn << std::endl;
+        //std::cout << " セル追加 rowなし : " << ro->r << " 行 " << cn << std::endl;
         //incolnum = NA.NumbertoArray(colnum_start);//数字を文字数時に
         ro->cells = addCtable(ro->cells, t, s, si, cn, v, f);
     }
     else {
         //rowあり
-        std::cout << " row あり　追加 v : " << v << std::endl;
+        //std::cout << " row あり　追加 v : " << v << std::endl;
 
         //入れるcellの前がなければ入れる
         C* Croot = ro->cells;
@@ -59,12 +59,12 @@ void Ctags::addcelldata(UINT8* row, UINT8* col, UINT8* t, UINT8* s, UINT8* v, F*
 
         while (incolnum <= cn) {
             if (incolnum == cn) {
-                std::cout << " セル追加 前あり　row : " << ro->r << " 行 " << incolnum << std::endl;
+                //std::cout << " セル追加 前あり　row : " << ro->r << " 行 " << incolnum << std::endl;
                 //incolnum = NA.NumbertoArray(colnum_start);//数字を文字数時に
                 ro->cells = addCtable(ro->cells, t, s, si, incolnum, v, f);
             }
             else {
-                std::cout << " セル追加　row : " << ro->r << " 行 " << incolnum << " s " << s << std::endl;
+                //std::cout << " セル追加　row : " << ro->r << " 行 " << incolnum << " s " << s << std::endl;
                 //incolnum = NA.NumbertoArray(colnum_start);//数字を文字数時に
                 UINT8* n1 = (UINT8*)malloc(1); n1 = nullptr;
                 UINT8* n2 = (UINT8*)malloc(1); n2 = nullptr;
@@ -124,12 +124,12 @@ void Ctags::writesheetdata() {
     writecells();
     writefinal();
 
-    std::cout << "size : " << p << " dlen : " << dlen << std::endl;
+    //std::cout << "size : " << p << " dlen : " << dlen << std::endl;
 }
 //diment書き込み
 void Ctags::writeDiment() {
     const char* dimstart = "<dimension ref=\"";
-    std::cout << "ディメント更新" << p << std::endl;
+    //std::cout << "ディメント更新" << p << std::endl;
     while (dimstart[writep] != '\0') {
         wd[p] = dimstart[writep]; p++; writep++;
     }writep = 0;
@@ -146,7 +146,7 @@ void Ctags::writeDiment() {
     while (dm->eR[writep] != '\0') {//終了行
         wd[p] = dm->eR[writep]; p++; writep++;
     }writep = 0;
-    std::cout << "ディメント更新" << dm->eC << std::endl;
+    //std::cout << "ディメント更新" << dm->eC << std::endl;
 }
 //cols書き込み
 void Ctags::writecols() {
@@ -154,68 +154,70 @@ void Ctags::writecols() {
     const char* colstr[] = { "<col min=\"","\" max=\"","\" width=\"","\" style=\""
         ,"\" bestFit=\"","\" hidden=\"","\" customWidth=\"" };
 
-    std::cout << "コルス更新" << p << std::endl;
+    //std::cout << "コルス更新" << p << std::endl;
     const char* endcols = "</cols>";
     int writep = 0;
+
+    cols* Col = cls;
     while (startcols[writep] != '\0') {
         wd[p] = startcols[writep]; p++; writep++;
     }
     writep = 0;
-    while (cls) {
+    while (Col) {
         while (colstr[0][writep] != '\0') {
             wd[p] = colstr[0][writep]; p++; writep++;
         }writep = 0;
-        while (cls->min[writep] != '\0') {//min+head
-            wd[p] = cls->min[writep]; p++; writep++;
+        while (Col->min[writep] != '\0') {//min+head
+            wd[p] = Col->min[writep]; p++; writep++;
         }writep = 0;
         while (colstr[1][writep] != '\0') {
             wd[p] = colstr[1][writep]; p++; writep++;
         }writep = 0;
-        while (cls->max[writep] != '\0') {//max
-            wd[p] = cls->max[writep]; p++; writep++;
+        while (Col->max[writep] != '\0') {//max
+            wd[p] = Col->max[writep]; p++; writep++;
         }writep = 0;
         while (colstr[2][writep] != '\0') {
             wd[p] = colstr[2][writep]; p++; writep++;
         }writep = 0;
-        while (cls->width[writep] != '\0') {//width
-            wd[p] = cls->width[writep]; p++; writep++;
+        while (Col->width[writep] != '\0') {//width
+            wd[p] = Col->width[writep]; p++; writep++;
         }writep = 0;
-        if (cls->style) {
+        if (Col->style) {
             while (colstr[3][writep] != '\0') {
                 wd[p] = colstr[3][writep]; p++; writep++;
             }writep = 0;
-            while (cls->style[writep] != '\0') {//style
-                wd[p] = cls->style[writep]; p++; writep++;
+            while (Col->style[writep] != '\0') {//style
+                wd[p] = Col->style[writep]; p++; writep++;
             }writep = 0;
         }
-        if (cls->hidden) {
+        if (Col->hidden) {
             while (colstr[5][writep] != '\0') {
                 wd[p] = colstr[5][writep]; p++; writep++;
             }writep = 0;
-            while (cls->hidden[writep] != '\0') {//hidden
-                wd[p] = cls->hidden[writep]; p++; writep++;
+            while (Col->hidden[writep] != '\0') {//hidden
+                wd[p] = Col->hidden[writep]; p++; writep++;
             }writep = 0;
         }
-        if (cls->bestffit) {
+        if (Col->bestffit) {
             while (colstr[4][writep] != '\0') {
                 wd[p] = colstr[4][writep]; p++; writep++;
             }writep = 0;
-            while (cls->bestffit[writep] != '\0') {//hidden
-                wd[p] = cls->bestffit[writep]; p++; writep++;
+            while (Col->bestffit[writep] != '\0') {//hidden
+                wd[p] = Col->bestffit[writep]; p++; writep++;
             }writep = 0;
         }
-        if (cls->customwidth) {
+        if (Col->customwidth) {
             while (colstr[6][writep] != '\0') {
                 wd[p] = colstr[6][writep]; p++; writep++;
             }writep = 0;
-            while (cls->customwidth[writep] != '\0') {//hidden
-                wd[p] = cls->customwidth[writep]; p++; writep++;
+            while (Col->customwidth[writep] != '\0') {//hidden
+                wd[p] = Col->customwidth[writep]; p++; writep++;
             }writep = 0;
         }
         while (closetag[writep] != '\0') {
             wd[p] = closetag[writep]; p++; writep++;
         }writep = 0;
-        cls = cls->next;
+        Col = Col->next;
     }
     while (endcols[writep] != '\0') {
         wd[p] = endcols[writep]; p++; writep++;
@@ -232,96 +234,98 @@ void Ctags::writeSelection() {
         wd[p] = dimtopane[writep]; p++; writep++;
     }writep = 0;
 
+    Pane* Pa = Panes;
     // <pane 書き込み
     // <pane xSplit="176" ySplit="11" topLeftCell="HI75" activePane="bottomRight" state="frozen"/>
-    while (Panes) {
+    while (Pa) {
         while (panes[0][writep] != '\0') {// <pane
             wd[p] = panes[0][writep]; p++; writep++;
         }writep = 0;
 
-        if (Panes->xSp) {
+        if (Pa->xSp) {
             while (panes[1][writep] != '\0') {// <pane
                 wd[p] = panes[1][writep]; p++; writep++;
             }writep = 0;
-            while (Panes->xSp[writep] != '\0') {//pane
-                wd[p] = Panes->xSp[writep]; p++; writep++;
+            while (Pa->xSp[writep] != '\0') {//pane
+                wd[p] = Pa->xSp[writep]; p++; writep++;
             }writep = 0;
             wd[p] = '"'; p++;
         }
-        if (Panes->ySp) {
+        if (Pa->ySp) {
             while (panes[2][writep] != '\0') {// <pane
                 wd[p] = panes[2][writep]; p++; writep++;
             }writep = 0;
-            while (Panes->ySp[writep] != '\0') {//pane
-                wd[p] = Panes->ySp[writep]; p++; writep++;
+            while (Pa->ySp[writep] != '\0') {//pane
+                wd[p] = Pa->ySp[writep]; p++; writep++;
             }writep = 0;
             wd[p] = '"'; p++;
         }
-        if (Panes->tLeftC) {
+        if (Pa->tLeftC) {
             while (panes[3][writep] != '\0') {// <pane
                 wd[p] = panes[3][writep]; p++; writep++;
             }writep = 0;
-            while (Panes->tLeftC[writep] != '\0') {//pane
-                wd[p] = Panes->tLeftC[writep]; p++; writep++;
+            while (Pa->tLeftC[writep] != '\0') {//pane
+                wd[p] = Pa->tLeftC[writep]; p++; writep++;
             }writep = 0;
             wd[p] = '"'; p++;
         }
-        if (Panes->activP) {
+        if (Pa->activP) {
             while (panes[4][writep] != '\0') {// <pane
                 wd[p] = panes[4][writep]; p++; writep++;
             }writep = 0;
-            while (Panes->activP[writep] != '\0') {//pane
-                wd[p] = Panes->activP[writep]; p++; writep++;
+            while (Pa->activP[writep] != '\0') {//pane
+                wd[p] = Pa->activP[writep]; p++; writep++;
             }writep = 0;
             wd[p] = '"'; p++;
         }
-        if (Panes->state) {
+        if (Pa->state) {
             while (panes[5][writep] != '\0') {// <pane
                 wd[p] = panes[5][writep]; p++; writep++;
             }writep = 0;
-            while (Panes->state[writep] != '\0') {//pane
-                wd[p] = Panes->state[writep]; p++; writep++;
+            while (Pa->state[writep] != '\0') {//pane
+                wd[p] = Pa->state[writep]; p++; writep++;
             }writep = 0;
             wd[p] = '"'; p++;
         }
         wd[p] = '/'; p++;
         wd[p] = '>'; p++;
-        Panes = Panes->next;
+        Pa = Pa->next;
     }
 
+    selection* Sel = sct;
     // <selection 書き込み
-    while (sct) {
+    while (Sel) {
         while (selpane[0][writep] != '\0') {
             wd[p] = selpane[0][writep]; p++; writep++;
         }writep = 0;
-        if (sct->p) {
-            while (sct->p[writep] != '\0') {//pane
-                wd[p] = sct->p[writep]; p++; writep++;
+        if (Sel->p) {
+            while (Sel->p[writep] != '\0') {//pane
+                wd[p] = Sel->p[writep]; p++; writep++;
             }writep = 0;
         }
         
         while (selpane[1][writep] != '\0') {
             wd[p] = selpane[1][writep]; p++; writep++;
         }writep = 0;
-        if (sct->a) {
-            while (sct->a[writep] != '\0') {//activcell
-                wd[p] = sct->a[writep]; p++; writep++;
+        if (Sel->a) {
+            while (Sel->a[writep] != '\0') {//activcell
+                wd[p] = Sel->a[writep]; p++; writep++;
             }writep = 0;
         }
         
         while (selpane[2][writep] != '\0') {
             wd[p] = selpane[2][writep]; p++; writep++;
         }writep = 0;
-        if (sct->s) {
-            while (sct->s[writep] != '\0') {//sqref
-                wd[p] = sct->s[writep]; p++; writep++;
+        if (Sel->s) {
+            while (Sel->s[writep] != '\0') {//sqref
+                wd[p] = Sel->s[writep]; p++; writep++;
             }writep = 0;
         }
         
         while (closetag[writep] != '\0') {
             wd[p] = closetag[writep]; p++; writep++;
         }writep = 0;
-        sct = sct->next;
+        Sel = Sel->next;
     }
 
     while (selpane[3][writep] != '\0') {
@@ -356,81 +360,83 @@ void Ctags::writecells() {
     const char* rend = "\">";
     const char* Rend = "</row>";
 
-    while (rows) {
+    Row* Ro = rows;
+
+    while (Ro) {
         while (rstart[writep] != '\0') {
             wd[p] = rstart[writep]; p++; writep++;
         }writep = 0;
-        UINT8* RN = NA.InttoChar(rows->r, &Place);//数字　配列変換
+        UINT8* RN = NA.InttoChar(Ro->r, &Place);//数字　配列変換
         while (RN[writep] != '\0') {// r
             wd[p] = RN[writep]; p++; writep++;
         }writep = 0;
-        if (rows->spanS) {//ない場合ある
+        if (Ro->spanS) {//ない場合ある
             while (rspa[writep] != '\0') {//span
                 wd[p] = rspa[writep]; p++; writep++;
             }writep = 0;
 
-            while (rows->spanS[writep] != '\0') {// spanstart
-                wd[p] = rows->spanS[writep]; p++; writep++;
+            while (Ro->spanS[writep] != '\0') {// spanstart
+                wd[p] = Ro->spanS[writep]; p++; writep++;
             }writep = 0;
             wd[p] = ':'; p++;
         }
-        if (rows->spanE) {
-            while (rows->spanE[writep] != '\0') {// spanend
-                wd[p] = rows->spanE[writep]; p++; writep++;
+        if (Ro->spanE) {
+            while (Ro->spanE[writep] != '\0') {// spanend
+                wd[p] = Ro->spanE[writep]; p++; writep++;
             }writep = 0;
         }
-        if (rows->s) {
+        if (Ro->s) {
             while (rS[writep] != '\0') {
                 wd[p] = rS[writep]; p++; writep++;
             }writep = 0;
-            while (rows->s[writep] != '\0') {// s
-                wd[p] = rows->s[writep]; p++; writep++;
+            while (Ro->s[writep] != '\0') {// s
+                wd[p] = Ro->s[writep]; p++; writep++;
             }writep = 0;
         }
-        if (rows->customFormat) {
+        if (Ro->customFormat) {
             while (rcF[writep] != '\0') {// customformat
                 wd[p] = rcF[writep]; p++; writep++;
             }writep = 0;
-            while (rows->customFormat[writep] != '\0') {//r
-                wd[p] = rows->customFormat[writep]; p++; writep++;
+            while (Ro->customFormat[writep] != '\0') {//r
+                wd[p] = Ro->customFormat[writep]; p++; writep++;
             }writep = 0;
         }
-        if (rows->ht) {
+        if (Ro->ht) {
             while (rtaght[writep] != '\0') {// ht
                 wd[p] = rtaght[writep]; p++; writep++;
             }writep = 0;
-            while (rows->ht[writep] != '\0') {//r
-                wd[p] = rows->ht[writep]; p++; writep++;
+            while (Ro->ht[writep] != '\0') {//r
+                wd[p] = Ro->ht[writep]; p++; writep++;
             }writep = 0;
         }
-        if (rows->customHeight) {
+        if (Ro->customHeight) {
             while (rcH[writep] != '\0') {//custumhigh
                 wd[p] = rcH[writep]; p++; writep++;
             }writep = 0;
-            while (rows->customHeight[writep] != '\0') {//r
-                wd[p] = rows->customHeight[writep]; p++; writep++;
+            while (Ro->customHeight[writep] != '\0') {//r
+                wd[p] = Ro->customHeight[writep]; p++; writep++;
             }writep = 0;
         }
-        if (rows->thickBot) {
+        if (Ro->thickBot) {
             while (rtB[writep] != '\0') {// thickbot
                 wd[p] = rtB[writep]; p++; writep++;
             }writep = 0;
-            while (rows->thickBot[writep] != '\0') {//r
-                wd[p] = rows->thickBot[writep]; p++; writep++;
+            while (Ro->thickBot[writep] != '\0') {//r
+                wd[p] = Ro->thickBot[writep]; p++; writep++;
             }writep = 0;
         }
         while (rend[writep] != '\0') {// ">
             wd[p] = rend[writep]; p++; writep++;
         }writep = 0;
 
-        UINT8* rne = NA.InttoChar(rows->r, &Place);//配列に変更
-        writec(rows->cells, rne);
+        UINT8* rne = NA.InttoChar(Ro->r, &Place);//配列に変更
+        writec(Ro->cells, rne);
 
         while (Rend[writep] != '\0') {// ">
             wd[p] = Rend[writep]; p++; writep++;
         }writep = 0;
 
-        rows = rows->next;
+        Ro = Ro->next;
     }
     while (shend[writep] != '\0') {
         wd[p] = shend[writep]; p++; writep++;

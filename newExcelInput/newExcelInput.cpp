@@ -56,8 +56,8 @@ int main(char* fname[], int i) {
 
     // メモリリーク検出
     //_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-    char Zfn[] = "C:/Users/Bee/Desktop/発注てんぷれ.xlsx";
-    char mfile[] = "C:/Users/Bee/Desktop/test[システム]test.xlsx"; //テスト書き出し
+    char Zfn[] = "C:/Users/Bee/Desktop/【1 縦売り 夏】在庫状況.xlsx";
+    char mfile[] = "C:/Users/Bee/Desktop/teststyle.xml"; //テスト書き出し
     char recd[] = "C:/Users/Bee/Desktop/Centraldata"; //テスト書き出し
     
     char shares[] = "sharedStrings.xml";
@@ -110,6 +110,10 @@ int main(char* fname[], int i) {
     }
 
     FILE* f=nullptr;
+    fopen_s(&f, mfile, "wb");
+    if (!f)
+        printf("ファイルを開けませんでした");
+    
 
     checkstyle* sr = new checkstyle(f);
     
@@ -145,8 +149,31 @@ int main(char* fname[], int i) {
 
             mh = new Ctags(Hdeco->ReadV, Hdeco->readlen, sharray);//シートデータ読み込み
             mh->sheetread();
+            
+            UINT8 be[] = "magaseek";
+            sr->configstyle(be);
 
-            //style 検索
+            sr->styledatawrite();
+            
+            delete Hdeco;//デコードデータ　削除
+            delete mh;
+        }
+    }
+    std::cout << "end item search" << std::endl;
+    
+    delete sharray;
+
+    delete hr2;
+         
+    Zr.close();
+
+    fclose(f);
+    
+    return 0;
+}
+
+/*
+//style 検索
             //177 検索
             int stylec = 0;
 
@@ -336,21 +363,4 @@ int main(char* fname[], int i) {
                 std::cout << "numFmtId : " << sr->numFmtsRoot->Id << std::endl;
             if (sr->numFmtsRoot->Code)
                 std::cout << "code : " << sr->numFmtsRoot->Code << std::endl;
-            
-            UINT8 be[] = "magaseek";
-            sr->configstyle(be);
-            
-            delete Hdeco;//デコードデータ　削除
-            delete mh;
-        }
-    }
-    std::cout << "end item search" << std::endl;
-    
-    delete sharray;
-
-    delete hr2;
-         
-    Zr.close();
-    
-    return 0;
-}
+                */

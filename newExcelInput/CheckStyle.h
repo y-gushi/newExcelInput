@@ -5,6 +5,8 @@
 class checkstyle:public StyleWrite
 {
 public:
+	UINT8* style = nullptr;//s 決定
+
 	checkstyle(FILE* f);
 	~checkstyle();
 
@@ -468,8 +470,6 @@ inline void checkstyle::configstyle(UINT8* num)
 
 	UINT8* nullbox = (UINT8*)malloc(1); nullbox = nullptr;
 
-	UINT8* style = nullptr;//s 決定
-
 	int fontnumb = 0;//検索番号
 	int place = 0;//検索番号　桁数
 
@@ -539,6 +539,7 @@ inline void checkstyle::configstyle(UINT8* num)
 	csx->applyNumberFormat = (UINT8*)malloc(1); csx->applyNumberFormat = nullptr;
 	csx->applyFont = (UINT8*)malloc(1); csx->applyFont = nullptr;
 	csx->applyProtection = (UINT8*)malloc(1); csx->applyProtection = nullptr;
+	csx->applyFill = (UINT8*)malloc(1); csx->applyFill = nullptr;
 
 	//入力文字　ショップ別
 	int resultshop = 0;
@@ -786,7 +787,7 @@ inline void checkstyle::configstyle(UINT8* num)
 		else {
 			//cellstyle xfs 設定追加　必要
 			std::cout << "need add cellstyleXfs" << std::endl;
-			cellstyleXfsRoot=addstylexf(cellstyleXfsRoot, csx->numFmtId, csx->fontId, csx->fillId, csx->borderId, csx->applyNumberFormat, csx->applyBorder, csx->applyAlignment, csx->applyProtection, csx->Avertical, csx->applyFont);
+			cellstyleXfsRoot=addstylexf(cellstyleXfsRoot, csx->numFmtId, csx->fontId, csx->fillId, csx->borderId, csx->applyNumberFormat, csx->applyBorder, csx->applyAlignment, csx->applyProtection, csx->Avertical, csx->applyFont,csx->applyFill);
 			CountincIiment(cellStyleXfsCount);
 		}
 	}

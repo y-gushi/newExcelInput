@@ -124,9 +124,10 @@ void styleread::freeDxf(Dxf* f) {
 	}
 }
 
-Fonts* styleread::addfonts(Fonts* f, UINT8* sz, UINT8* co, UINT8* na, UINT8* fa, UINT8* cha, UINT8* sch,UINT8* rg) {
+Fonts* styleread::addfonts(Fonts* f,UINT8* b, UINT8* sz, UINT8* co, UINT8* na, UINT8* fa, UINT8* cha, UINT8* sch,UINT8* rg,UINT8* ind) {
 	if (!f) {
 		f = (Fonts*)malloc(sizeof(Fonts));
+		f->biu = b;
 		f->sz = sz;
 		f->color = co;
 		f->name = na;
@@ -134,10 +135,11 @@ Fonts* styleread::addfonts(Fonts* f, UINT8* sz, UINT8* co, UINT8* na, UINT8* fa,
 		f->charset = cha;
 		f->scheme = sch;
 		f->rgb = rg;
+		f->indexed = ind;
 		f->next = nullptr;
 	}
 	else {
-		f->next = addfonts(f->next, sz, co, na, fa, cha, sch,rg);
+		f->next = addfonts(f->next,b, sz, co, na, fa, cha, sch,rg,ind);
 	}
 
 	return f;
@@ -175,7 +177,7 @@ borders* styleread::addborder(borders* b, borderstyle* l,borderstyle* r,borderst
 	return b;
 }
 
-stylexf* styleread::addstylexf(stylexf* sx, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* ap, UINT8* av, UINT8* af) {
+stylexf* styleread::addstylexf(stylexf* sx, UINT8* n, UINT8* fo, UINT8* fi, UINT8* bi, UINT8* an, UINT8* ab, UINT8* aa, UINT8* ap, UINT8* av, UINT8* af, UINT8* afil) {
 	if (!sx) {
 		sx = (stylexf*)malloc(sizeof(stylexf));
 		sx->numFmtId = n;
@@ -188,10 +190,11 @@ stylexf* styleread::addstylexf(stylexf* sx, UINT8* n, UINT8* fo, UINT8* fi, UINT
 		sx->applyProtection = ap;
 		sx->Avertical = av;//alignment vertical
 		sx->applyFont = af;
+		sx->applyFill = afil;
 		sx->next = nullptr;
 	}
 	else {
-		sx->next = addstylexf(sx->next, n, fo, fi, bi, an, ab, aa, ap, av,af);
+		sx->next = addstylexf(sx->next, n, fo, fi, bi, an, ab, aa, ap, av,af,afil);
 	}
 
 	return sx;
@@ -285,15 +288,22 @@ void styleread::readfontV(UINT8* dat) {
 	const char fami[13] = "family val=\"";//12
 	const char chars[14] = "charset val=\"";//13
 	const char sche[13] = "scheme val=\"";//12
+	const char inde[16]="color indexed=\"";//15
 
 	const char Efont[] = "</font>";//7ji
 
+	const char btag[5] = "<b/>";
+	const char itag[5] = "<i/>";
+	const char utag[5] = "<u/>";//4
+
 	UINT8 endtag[8] = { 0 };//7文字
+	UINT8 biutag[5] = { 0 };//4文字
 	UINT8 strsear[14] = { 0 };//13文字
 	UINT8 seafam[13] = { 0 };//12文字
 	UINT8 seanam[11] = { 0 };//10文字
 	UINT8 Sz[9] = { 0 };//8文字
 	UINT8 rgb[12] = { 0 };//11文字
+	UINT8 index[16] = { 0 };//15文字
 
 	UINT8* SZ = (UINT8*)malloc(1); SZ = nullptr;
 	UINT8* Name = (UINT8*)malloc(1); Name = nullptr;
@@ -302,6 +312,8 @@ void styleread::readfontV(UINT8* dat) {
 	UINT8* Charset = (UINT8*)malloc(1); Charset = nullptr;
 	UINT8* Scheme = (UINT8*)malloc(1); Scheme = nullptr;
 	UINT8* RGB = (UINT8*)malloc(1); RGB = nullptr;
+	UINT8* IND = (UINT8*)malloc(1); IND = nullptr;
+	UINT8* BIU = (UINT8*)malloc(1); BIU = nullptr;
 
 	int eresult = 1;
 	int txtresult = 0;
@@ -309,8 +321,10 @@ void styleread::readfontV(UINT8* dat) {
 	// </font>まで読み込み
 	while (eresult != 0) {
 		//1つずつずらす
-		for (int i = 0; i < 12; i++) {
-			strsear[i] = strsear[i + 1];
+		for (int i = 0; i < 14; i++) {
+			index[i] = index[i + 1];
+			if(i<12)
+				strsear[i] = strsear[i + 1];
 			if (i < 6)
 				endtag[i] = endtag[i + 1];
 			if (i < 12 - 1)
@@ -321,12 +335,39 @@ void styleread::readfontV(UINT8* dat) {
 				Sz[i] = Sz[i + 1];
 			if (i < 11 - 1)
 				rgb[i] = rgb[i + 1];
+			if (i < 4 - 1)
+				biutag[i] = biutag[i + 1];
 		}
-		rgb[10]=Sz[7]=strsear[12] = endtag[6] = seafam[11] = seanam[9] = dat[readp];
-		rgb[11] = Sz[8]=strsear[13] = endtag[7] = seafam[12] = seanam[10] = '\0';
+		biutag[3] = index[14] = rgb[10]=Sz[7]=strsear[12] = endtag[6] = seafam[11] = seanam[9] = dat[readp];
+		biutag[4] = index[15] = rgb[11] = Sz[8]=strsear[13] = endtag[7] = seafam[12] = seanam[10] = '\0';
 		readp++;
 
 		//txtresult = strncmp((const char*)strsear, sche, 12);//font スタートタグ 検索
+
+		txtresult = strncmp((const char*)biutag, btag, 4);//indexed 検索
+		if (txtresult == 0) { //scheme 読み込み
+			free(BIU);
+			BIU = (UINT8*)malloc(5);
+			strcpy_s((char*)BIU, 5, btag);
+		}
+
+		txtresult = strncmp((const char*)biutag, itag, 4);//indexed 検索
+		if (txtresult == 0) { //scheme 読み込み
+			free(BIU);
+			BIU = (UINT8*)malloc(5);
+			strcpy_s((char*)BIU, 5, itag);
+		}
+
+		txtresult = strncmp((const char*)biutag, utag, 4);//indexed 検索
+		if (txtresult == 0) { //scheme 読み込み
+			free(BIU);
+			BIU = (UINT8*)malloc(5);
+			strcpy_s((char*)BIU, 5, utag);
+		}
+
+		txtresult = strncmp((const char*)index, inde, 15);//indexed 検索
+		if (txtresult == 0) //scheme 読み込み
+			Scheme = getValue(dat);
 
 		txtresult = strncmp((const char*)seafam, sche, 12);//scheme 検索
 		if (txtresult == 0) //scheme 読み込み
@@ -365,7 +406,7 @@ void styleread::readfontV(UINT8* dat) {
 		eresult = strcmp((const char*)endtag, Efont);
 	}
 
-	fontRoot = addfonts(fontRoot, SZ, Color, Name, Family, Charset, Scheme,RGB);//フォント　追加
+	fontRoot = addfonts(fontRoot,BIU, SZ, Color, Name, Family, Charset, Scheme,RGB,IND);//フォント　追加
 }
 
 UINT8* styleread::readfonts(UINT8* sd) {
@@ -376,13 +417,6 @@ UINT8* styleread::readfonts(UINT8* sd) {
 	UINT8 startTag[7] = { 0 };//6文字
 
 	UINT8 endtag[9] = { 0 };//8文字
-
-	UINT8* SZ = (UINT8*)malloc(1); SZ = nullptr;
-	UINT8* Name = (UINT8*)malloc(1); Name = nullptr;
-	UINT8* Color = (UINT8*)malloc(1); Color = nullptr;
-	UINT8* Family = (UINT8*)malloc(1); Color = nullptr;
-	UINT8* Charset = (UINT8*)malloc(1); Charset = nullptr;
-	UINT8* Scheme = (UINT8*)malloc(1); Scheme = nullptr;
 
 	int eresult = 1;
 	int txtresult = 0;
@@ -826,6 +860,7 @@ void styleread::getCellStyleXfsV(UINT8* d) {
 	const char applyAlignment[] = "applyAlignment=\"";//16文字
 	const char applyProtection[] = "applyProtection=\"";//17文字
 	const char afon[] = "applyFont=\"";//11文字
+	const char afil[] = "applyFill=\"";//11文字
 
 	const char endtag[] = "</xf>";//5文字
 
@@ -849,6 +884,7 @@ void styleread::getCellStyleXfsV(UINT8* d) {
 	UINT8* Aal = (UINT8*)malloc(1); Aal = nullptr;
 	UINT8* Apr = (UINT8*)malloc(1); Apr = nullptr;
 	UINT8* Afo = (UINT8*)malloc(1); Afo = nullptr;
+	UINT8* Afi = (UINT8*)malloc(1); Afi = nullptr;
 
 	int result = 1;
 	int sresult = 0;
@@ -879,41 +915,54 @@ void styleread::getCellStyleXfsV(UINT8* d) {
 		if (d[readp - 1] == '/')
 			if (d[readp] == '>')
 				break;
-		sresult = strncmp((const char*)apro, afon, 11);
+		sresult = strncmp((const char*)afo, afon, 11);
 		if (sresult == 0) {
-			//numFmtId　値読み込み
+			//apply font　値読み込み
 			free(Afo);
 			Afo = getValue(d);
+			std::cout << "afo : " << Afo << std::endl;
 		}
-		sresult = strncmp((const char*)afo, applyProtection, 17);
+		sresult = strncmp((const char*)afo, afil, 11);
+		if (sresult == 0) {
+			//numFmtId　値読み込み
+			free(Afi);
+			Afi = getValue(d);
+			std::cout << "afi : " << Afi << std::endl;
+		}
+		sresult = strncmp((const char*)apro, applyProtection, 17);
 		if (sresult == 0) {
 			//numFmtId　値読み込み
 			free(Apr);
 			Apr = getValue(d);
+			std::cout << "apr : " << Apr << std::endl;
 		}
 		sresult = strncmp((const char*)aali, applyAlignment, 16);
 		if (sresult == 0) {
 			//numFmtId　値読み込み
 			free(Aal);
 			Aal = getValue(d);
+			std::cout << "Aal : " << Aal << std::endl;
 		}
 		sresult = strncmp((const char*)abor, applyBorder, 13);
 		if (sresult == 0) {
 			//numFmtId　値読み込み
 			free(Abo);
 			Abo = getValue(d);
+			std::cout << "abo : " << Abo << std::endl;
 		}
 		sresult = strncmp((const char*)anum, applyNumberFormat, 19);
 		if (sresult == 0) {
 			//numFmtId　値読み込み
 			free(Anu);
 			Anu = getValue(d);
+			std::cout << "anu : " << Anu << std::endl;
 		}
 		sresult = strncmp((const char*)borid, numFmtId, 10);
 		if (sresult == 0) {
 			//numFmtId　値読み込み
 			free(num);
 			num = getValue(d);
+			std::cout << "num : " << num << std::endl;
 		}
 		sresult = strncmp((const char*)borid, borderId, 10);
 		if (sresult == 0) {
@@ -926,23 +975,27 @@ void styleread::getCellStyleXfsV(UINT8* d) {
 			//vertical　値読み込み
 			free(verti);
 			verti = getValue(d);
+			std::cout << "vert : " << verti << std::endl;
 		}
 		sresult = strncmp((const char*)Fid, fontId, 8);
 		if (sresult == 0) {
 			//fontId　値読み込み
 			free(fon);
 			fon = getValue(d);
+			std::cout << "fon : " << fon << std::endl;
 		}
 		sresult = strncmp((const char*)Fid, fillId, 8);
 		if (sresult == 0) {
 			//fillId　値読み込み
 			free(fil);
 			fil = getValue(d);
+			std::cout << "fil : " << fil << std::endl;
 		}
 		result = strncmp((const char*)Et, endtag, 5);
 	}
-
-	cellstyleXfsRoot = addstylexf(cellstyleXfsRoot, num, fon, fil, bor, Anu, Abo, Aal, Apr, verti,Afo);
+	tescou++;
+	std::cout << "count : " << tescou << std::endl;
+	cellstyleXfsRoot = addstylexf(cellstyleXfsRoot, num, fon, fil, bor, Anu, Abo, Aal, Apr, verti,Afo,Afi);
 }
 
 //CellXfs読み込み
@@ -1184,7 +1237,7 @@ void styleread::getnumFmts(UINT8* dat) {
 	UINT8* ID = (UINT8*)malloc(1); ID = nullptr;
 	UINT8* COD = (UINT8*)malloc(1); COD = nullptr;
 
-	while (dat[readp] != '/') {
+	while (dat[readp] != '>') {
 		for (int i = 0; i < 11; i++) {
 			code[i] = code[i + 1];
 			if (i < 9)
@@ -1199,6 +1252,7 @@ void styleread::getnumFmts(UINT8* dat) {
 			//read values
 			free(ID);
 			ID= getValue(dat);
+			std::cout << "get numfmts id"<< ID << std::endl;
 		}
 
 		result = strncmp((const char*)code, formatCode, 12);
@@ -1352,7 +1406,9 @@ dxfFont* styleread::readdxffont(UINT8* d) {
 	const char rgb[] = "rgb=\"";//5文字
 	const char theme[] = "theme=\"";//7文字
 	const char etag[] = "</font>";//7文字
+	const char btag[] = "<b/>";//4文字
 
+	UINT8 bol[5] = { 0 };//4文字
 	UINT8 Val[6] = { 0 };//5文字
 	UINT8 Them[8] = { 0 };//7文字
 
@@ -1369,9 +1425,11 @@ dxfFont* styleread::readdxffont(UINT8* d) {
 			Them[i] = Them[i + 1];
 			if (i < 4)
 				Val[i] = Val[i + 1];
+			if (i < 3)
+				bol[i] = bol[i + 1];
 		}
-		Them[6] = Val[4]= d[readp];
-		Them[7] = Val[5]= '\0';
+		bol[3] = Them[6] = Val[4]= d[readp];
+		bol[4] = Them[7] = Val[5]= '\0';
 		readp++;
 
 		result = strncmp((const char*)Val, val, 5);
@@ -1379,6 +1437,14 @@ dxfFont* styleread::readdxffont(UINT8* d) {
 			//read values
 			free(VAL);
 			VAL = getValue(d);
+		}
+
+		result = strncmp((const char*)bol, btag, 4);
+		if (result == 0) {
+			//read values
+			free(B);
+			B = (UINT8*)malloc(5);
+			strcpy_s((char*)B, 5, btag);
 		}
 
 		result = strncmp((const char*)Val, rgb, 5);
@@ -1510,14 +1576,14 @@ void styleread::readdxfs(UINT8* d) {
 		result = strncmp((const char*)stag, dxf, 5);
 		if (result == 0) {
 			//read values
-			getnumFmts(d);
+			getdxfs(d);
 		}
 
 		eresu = strncmp((const char*)etag, Edxf, 7);
 	}
 }
 //colors 値取得
-colors* styleread::getcolor(UINT8* d) {
+void styleread::getcolor(UINT8* d) {
 	const char rgb[] = "rgb=\"";//5文字
 
 	UINT8 Rg[6] = { 0 };//5文字
@@ -1542,10 +1608,8 @@ colors* styleread::getcolor(UINT8* d) {
 		}
 	}
 
-	colors* c = (colors*)malloc(sizeof(colors));
-	c->color = RGB;
+	colorsRoot=addcolor(colorsRoot, RGB);
 
-	return c;
 }
 //colors 読み込み
 void styleread::readcolors(UINT8* d) {
@@ -1570,13 +1634,13 @@ void styleread::readcolors(UINT8* d) {
 		result = strncmp((const char*)stag, color, 6);
 		if (result == 0) {
 			//read values
-			getnumFmts(d);
+			getcolor(d);
 		}
 
 		eresu = strncmp((const char*)etag, Ecolor, 9);
 	}
 }
-
+//最終文字列
 void styleread::readextLst(UINT8* d) {
 	const char Endtag[] = "</extLst>";//9
 
@@ -1597,12 +1661,17 @@ void styleread::readextLst(UINT8* d) {
 	}
 
 	size_t dis = size_t(readp) - stockp;//文字列長さ
+	size_t msi = dis + 1;
 
-	extLstStr = (UINT8*)malloc(dis);
+	extLstStr = (UINT8*)malloc(msi);
 
 	//最終文字列コピー
 	for (size_t i = 0; i < dis; i++)
 		extLstStr[i] = d[stockp + i];
+
+	extLstStr[dis] = '\0';
+
+	std::cout << "extLst : " << extLstStr << std::endl;
 }
 
 void styleread::readstyle(UINT8* sdata, UINT64 sdatalen)
@@ -1635,7 +1704,7 @@ void styleread::readstyle(UINT8* sdata, UINT64 sdatalen)
 		//1つずつずらす
 		for (int i = 0; i < 15-1; i++) {
 			sExfs[i] = sExfs[i + 1];//エンドタグ
-			if(13 - 1)
+			if(i<13 - 1)
 				sEs[i] = sEs[i + 1];
 			if (i < 6 - 1)
 				sfon[i] = sfon[i + 1];
@@ -1664,6 +1733,8 @@ void styleread::readstyle(UINT8* sdata, UINT64 sdatalen)
 				styleSheetStr[i] = sdata[i];
 
 			styleSheetStr[slen - 1] = '\0';
+
+			std::cout << "style sheet start : " << styleSheetStr << std::endl;
 		}
 
 		otherresult = strncmp((const char*)sbor, Fmts, 8);
@@ -1703,7 +1774,8 @@ void styleread::readstyle(UINT8* sdata, UINT64 sdatalen)
 				result = strncmp((const char*)Cou, count, 7);
 				if (result == 0)
 					fontCount = getValue(sdata);//count 取得
-				if (exresult) {
+				if (exresult==0) {
+					std::cout << "known font : " << knoF << std::endl;
 					free(kFonts);
 					kFonts = getValue(sdata);
 				}
