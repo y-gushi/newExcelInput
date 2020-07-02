@@ -13,19 +13,22 @@ public:
     ArrayNumber NA;
     selection* SCT = nullptr;
 
-    const char* Ctag = "<c ";
+    const char* Ctag = "<c";
     const char* Vtag = "<v>";
+    const char* endVtag = "</v>";
     const char* SVend = "</sheetViews>";//13
-    const char* endC = "/c>";
+    const char* endC = "</c>";
     const char* Ftag = "<f";
+    const char* endFtag = "</f>";
     const char* Rowtag = "<row";
     const char* sheetPr = "<sheetPr";//8
     const char* sheetPrEnd = "</sheetPr>";//10
     const char* codename = "codeName=\"";//10
     const char* dement = "<dimension ref=\"";//16
     const char* pane = "<pane";//5
-    const char* Coltag = "<col ";//5•¶š
-    const char* endtag = "</cols>";//7•¶š
+    const char* Coltag = "<col ";//5æ–‡å­—
+    const char* endtag = "</cols>";//7æ–‡å­—
+    const char* slashend="/>";//2æ–‡å­—
 
     //row tag values
     const char* Rr = "r=\"";//3
@@ -62,37 +65,51 @@ public:
     UINT64 p = 0;
     UINT8* fstr = nullptr;
 
-    UINT8* headXML = nullptr;// <sheetPr‚Ü‚Å‚Ì•¶š
-    UINT8* dimtopane = nullptr;// dimension />‚©‚ç<pane •Â‚¶ƒ^ƒO‚Ü‚Å‚Ì•¶š
-    UINT8* sFPr = nullptr;//sheetFormatPr‚Ìæ“¾
-    UINT8* MC;//ƒ}[ƒWƒZƒ‹”
+    UINT8* headXML = nullptr;// <sheetPrã¾ã§ã®æ–‡å­—
+    UINT8* dimtopane = nullptr;// dimension />ã‹ã‚‰<pane é–‰ã˜ã‚¿ã‚°ã¾ã§ã®æ–‡å­—
+    UINT8* sFPr = nullptr;//sheetFormatPrã®å–å¾—
+    UINT8* MC = nullptr;//ãƒãƒ¼ã‚¸ã‚»ãƒ«æ•°
 
-    UINT8* data;//ƒfƒR[ƒhƒf[ƒ^ ‰ğ•ú@ƒfƒR[ƒh‚Å
-    UINT8* wd;//ƒf[ƒ^XV—p
-    UINT64 dlen = 0;//ƒfƒR[ƒhƒf[ƒ^’·
-    UINT8* coden;//ƒR[ƒhƒl[ƒ€
-    shareRandD* sh;//share”z—ñ
-    UINT32 maxcol = 0;//•¶š”š@—ñmax
-    int sClen = 0;//diment •¶š”
-    int sRlen = 0;//diment •¶š”
-    int eClen = 0;//diment •¶š”
-    int eRlen = 0;//diment •¶š”
+    UINT8* data;//ãƒ‡ã‚³ãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿ è§£æ”¾ã€€ãƒ‡ã‚³ãƒ¼ãƒ‰ã§
+    UINT8* wd;//ãƒ‡ãƒ¼ã‚¿æ›´æ–°ç”¨
+    UINT64 dlen = 0;//ãƒ‡ã‚³ãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿é•·
+    UINT8* coden;//ã‚³ãƒ¼ãƒ‰ãƒãƒ¼ãƒ 
+    shareRandD *sh;//shareé…åˆ—
+    UINT32 maxcol = 0;//æ–‡å­—æ•°å­—ã€€åˆ—max
+    
+    UINT32 stocklen=0;//value stock str len
+    
+    int sClen = 0;//diment æ–‡å­—æ•°
+    int sRlen = 0;//diment æ–‡å­—æ•°
+    int eClen = 0;//diment æ–‡å­—æ•°
+    int eRlen = 0;//diment æ–‡å­—æ•°
 
     void GetCtagValue();
     void GetDiment();
     void GetSelectionPane();
     void Getrow();
     void GetSheetPr();
+    
     void Getcols();
+    void getcolv();
+    
+    void getselection();
+    
     C* addCtable(C* c, UINT8* tv, UINT8* sv, UINT8* si, UINT32 col, UINT8* v, F* fv);
     cols* addcolatyle(cols* cs, UINT8* min, UINT8* max, UINT8* W, UINT8* sty, UINT8* hid, UINT8* bF, UINT8* cuW);
     cols* coltalloc();
     selection* SLTaddtable(selection* s, UINT8* pv, UINT8* av, UINT8* sv);
-    Row* addrows(Row* row, UINT32 r, UINT8* spanS, UINT8* spanE, UINT8* ht, UINT8* thickBot, UINT8* s, UINT8* customFormat, UINT8* customHeight,C* cell);//rowî•ñ@cellî•ñ’Ç‰Á
+    Row* addrows(Row* row, UINT32 r, UINT8* spanS, UINT8* spanE, UINT8* ht, UINT8* thickBot, UINT8* s, UINT8* customFormat, UINT8* customHeight,C* cell);//rowæƒ…å ±ã€€cellæƒ…å ±è¿½åŠ 
     Row* searchRow(Row* r, UINT32 newrow);
     Pane* addpanetable(Pane* p, UINT8* x, UINT8* y, UINT8* tl, UINT8* ap, UINT8* sta);
+    F* getFtag();
     void getfinalstr();
-
+    
+    void getCtag();
+    UINT8* getvalue();
+    UINT8* getVorftag(const char* tag,UINT32 taglen,UINT32 *size);
+    UINT8* getSi(UINT8* v,UINT32 vl);
+    
     void Ctablefree(C* c);
     void Rowtablefree();
     void selectfree();
@@ -105,7 +122,7 @@ public:
     const char* closetag = "\"/>";
     int writep = 0;
 
-    void addcelldata(UINT8* row, UINT8* col, UINT8* t, UINT8* s, UINT8* v, F* f, UINT8* si);//cel‘}“ü rowspan•ÏX
+    void addcelldata(UINT8* row, UINT8* col, UINT8* t, UINT8* s, UINT8* v, F* f, UINT8* si);//celæŒ¿å…¥ rowspanå¤‰æ›´
     void writesheetdata();
     void writecols();
     void writeDiment();
